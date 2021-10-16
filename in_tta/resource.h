@@ -2,11 +2,6 @@
 // Microsoft Visual C++ generated include file.
 // Used by in_tta.rc
 //
-#define IDD_CONFIG                      101
-#define IDD_ABOUT                       103
-#define IDC_PLUGIN_VERSION              1002
-#define IDC_PLUGIN_CREADIT              2037
-#define IDI_INFO_ICON                   10002
 
 // Next default values for new objects
 // 

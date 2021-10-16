@@ -7,13 +7,13 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "winres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// ì˙ñ{åÍ (ì˙ñ{) resources
+// Japanese (Japan) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
@@ -32,36 +32,37 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""afxres.h""\r\n"
+    "#include ""winres.h""\r\n"
     "\0"
 END
 
 3 TEXTINCLUDE 
 BEGIN
-    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
-    "#define _AFX_NO_OLE_RESOURCES\r\n"
-    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
-    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
     "\r\n"
-    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)\r\n"
-    "LANGUAGE 17, 1\r\n"
-    "#pragma code_page(932)\r\n"
-    "#include ""afxres.rc""     // Standard components\r\n"
-    "#endif\r\n"
     "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
 
+#endif    // Japanese (Japan) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United Kingdom) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
 //
-#include "..\common\VersionNo.h"
+
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION FILEVER
- PRODUCTVERSION PRODUCTVER
+ FILEVERSION 3,62,1,0
+ PRODUCTVERSION 3,62,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -74,98 +75,25 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "041104b0"
+        BLOCK "080904b0"
         BEGIN
-            VALUE "CompanyName", "Yamagata Fumihiro"
-            VALUE "FileDescription", "Winamp input extension for tta audio file"
-            VALUE "FileVersion", STRFILEVER
+            VALUE "CompanyName", "WACUP (WinAmp Community Update Project)"
+            VALUE "FileDescription", "Winamp Input Plug-in"
+            VALUE "FileVersion", "3.62.1.0"
             VALUE "InternalName", "in_tta.dll"
-            VALUE "LegalCopyright", COPYRIGHT_IN_TTA
+            VALUE "LegalCopyright", "Copyright © 2003 Alexander Djourik & copyright © 2005-2021 Yamagta Fumihiro. All rights reserved. WACUP related modifications by Darren Owen aka DrO (2021)"
             VALUE "OriginalFilename", "in_tta.dll"
-            VALUE "ProductName", "in_tta"
-            VALUE "ProductVersion", STRPRODUCTVER
+            VALUE "ProductName", "True Audio (TTA) Decoder"
+            VALUE "ProductVersion", "3.62.1.0"
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x411, 1200
+        VALUE "Translation", 0x809, 1200
     END
 END
 
-#endif    // ì˙ñ{åÍ (ì˙ñ{) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// âpåÍ (ïƒçë) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-#pragma code_page(1252)
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_ABOUT DIALOGEX 0, 0, 217, 159
-STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-CAPTION "About TTA plug-in"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
-BEGIN
-    GROUPBOX        "TTA input plug-in for Winamp 5",IDC_STATIC,5,2,208,53,BS_CENTER | WS_GROUP
-    GROUPBOX        "Credits",IDC_STATIC,5,65,208,73,WS_GROUP
-    PUSHBUTTON      "Close",IDOK,84,140,50,13
-    CTEXT           "Creadit",IDC_PLUGIN_CREADIT,5,73,201,63
-    CTEXT           "Plugin version",IDC_PLUGIN_VERSION,11,12,195,37
-END
-
-IDD_CONFIG DIALOGEX 0, 0, 127, 62
-STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-CAPTION "TTA Decoder Configuration"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
-BEGIN
-    GROUPBOX        "",IDC_STATIC,7,5,113,28,WS_GROUP
-    DEFPUSHBUTTON   "OK",IDOK,38,40,50,14,WS_GROUP
-    CTEXT           "No options are available",IDC_STATIC,15,16,95,10
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_ABOUT, DIALOG
-    BEGIN
-        RIGHTMARGIN, 213
-        VERTGUIDE, 5
-        VERTGUIDE, 213
-        BOTTOMMARGIN, 153
-    END
-
-    IDD_CONFIG, DIALOG
-    BEGIN
-        RIGHTMARGIN, 126
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDI_INFO_ICON           ICON                    "info.ico"
-#endif    // âpåÍ (ïƒçë) resources
+#endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -175,16 +103,7 @@ IDI_INFO_ICON           ICON                    "info.ico"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#define _AFX_NO_SPLITTER_RESOURCES
-#define _AFX_NO_OLE_RESOURCES
-#define _AFX_NO_TRACKER_RESOURCES
-#define _AFX_NO_PROPERTY_RESOURCES
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
-LANGUAGE 17, 1
-#pragma code_page(932)
-#include "afxres.rc"     // Standard components
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

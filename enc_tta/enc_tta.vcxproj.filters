@@ -1,59 +1,56 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ソース ファイル">
+    <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="ヘッダー ファイル">
+    <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="リソース ファイル">
+    <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="enc_tta.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AudioCoderTTA.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="filter.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource1.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="enc_tta.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AudioCoderTTA.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Resource.rc">
-      <Filter>リソース ファイル</Filter>
-    </ResourceCompile>
     <ResourceCompile Include="out_tta.rc">
-      <Filter>リソース ファイル</Filter>
+      <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
 </Project>

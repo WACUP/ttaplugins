@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define DECODEFILE_H
 
 #include "libtta.h"
-#include "in_tta.h"
 #include <stdexcept>
 #include <type_traits>
 
@@ -36,7 +35,7 @@ TTAint32 CALLBACK read_callback(_tag_TTA_io_callback *io, TTAuint8 *buffer, TTAu
 TTAint32 CALLBACK write_callback(_tag_TTA_io_callback *io, TTAuint8 *buffer, TTAuint32 size);
 TTAint64 CALLBACK seek_callback(_tag_TTA_io_callback *io, TTAint64 offset);
 
-__declspec(align(16)) class CDecodeFile
+/*__declspec(align(16))*/ class CDecodeFile
 {
 private:
 	std::wstring			FileName;
@@ -53,16 +52,16 @@ private:
 
 	HANDLE					decoderFileHANDLE;
 
-	std::aligned_storage<sizeof(tta::tta_decoder), __alignof(tta::tta_decoder)>::type ttadec_mem;
+	//std::aligned_storage<sizeof(tta::tta_decoder), __alignof(tta::tta_decoder)>::type ttadec_mem;
 	tta::tta_decoder *TTA;
-	__declspec(align(16)) TTA_info				tta_info;
+	/*__declspec(align(16))*/ TTA_info				tta_info;
 	__int64					signature;
 	static const __int64	sig_number = 7792625911880894;
 
 	CRITICAL_SECTION		CriticalSection;
 
 public:
-	__declspec(align(16)) TTA_io_callback_wrapper iocb_wrapper;
+	/*__declspec(align(16))*/ TTA_io_callback_wrapper iocb_wrapper;
 
 	CDecodeFile(void);
 	virtual ~CDecodeFile(void);

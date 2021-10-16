@@ -22,11 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //////////////////////////////////////////////////////////////////////
 #include "MediaLibrary.h"
 #include "resource.h"
-#include <taglib/trueaudiofile.h>
 #include <taglib/tag.h>
-#include <taglib/id3v2tag.h>
-#include <taglib/id3v1tag.h>
-#include <taglib/attachedpictureframe.h>
+#include <taglib/mpeg/id3v2/id3v2tag.h>
+#include <taglib/mpeg/id3v1/id3v1tag.h>
 #include <sstream>
 #include <iomanip>
 #include <strsafe.h>
@@ -50,13 +48,15 @@ CMediaLibrary::~CMediaLibrary()
 
 }
 
-void CMediaLibrary::FlushCache(void)
+void CMediaLibrary::FlushCache(const bool skipLock)
+{
+	if (!skipLock)
 {
 	::EnterCriticalSection(&CriticalSection);
+	}
 
 	GetTagTime = 0;
 
-	TagDataW.Length = 0;
 	TagDataW.Format = L"";
 	TagDataW.Title = L"";
 	TagDataW.Artist = L"";
@@ -75,13 +75,20 @@ void CMediaLibrary::FlushCache(void)
 
 	isValidFile = false;
 
+	if (!skipLock)
+	{
 	::LeaveCriticalSection(&CriticalSection);
+}
 }
 
 bool CMediaLibrary::GetTagInfo(const std::wstring fn)
 {
 	if (FileName != fn)
 	{
+		// just make sure that we've got things
+		// in a known state to avoid quirks...
+		FlushCache(true);
+
 		TagLib::TrueAudio::File TTAFile(fn.c_str());
 
 		if (!TTAFile.isValid())
@@ -94,7 +101,7 @@ bool CMediaLibrary::GetTagInfo(const std::wstring fn)
 		}
 		TagDataW.Length = (unsigned long)(TTAFile.audioProperties()->lengthInMilliseconds());
 
-		int Lengthbysec = TTAFile.audioProperties()->lengthInSeconds();
+		int Lengthbysec = ((TagDataW.Length > 0) ? (TagDataW.Length / 1000) : 0);
 		int hour = Lengthbysec / 3600;
 		int min = Lengthbysec / 60;
 		int sec = Lengthbysec % 60;
@@ -156,7 +163,6 @@ bool CMediaLibrary::GetTagInfo(const std::wstring fn)
 			TagDataW.Disc = temp;
 			temp = TTAFile.ID3v2Tag()->BPM().toCWString();
 			TagDataW.BPM = temp;
-
 		}
 		else if (NULL != TTAFile.ID3v1Tag())
 		{
@@ -191,9 +197,8 @@ bool CMediaLibrary::GetTagInfo(const std::wstring fn)
 	return true;
 }
 
-int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const wchar_t *Metadata, wchar_t *dest, size_t destlen)
+int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, wchar_t *dest, const size_t destlen)
 {
-
 	bool FindTag;
 	int RetCode;
 
@@ -217,78 +222,74 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const wchar_t *Metadat
 	}
 
 	if (FindTag) {
-		wchar_t	Buff[MAX_MUSICTEXT];
-		const char *MetaData = reinterpret_cast<const char*>(Metadata);
-
-		if (_stricmp(MetaData, "length") == 0)
+		if (_stricmp(Metadata, "length") == 0)
 		{
 			_ultow_s(TagDataW.Length, dest, destlen, 10);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "formatinformation") == 0)
+		else if (_stricmp(Metadata, "formatinformation") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Format.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "type") == 0)
+		else if (_stricmp(Metadata, "type") == 0)
 		{
-			Buff[0] = '0';
-			Buff[1] = 0;
-			wcsncpy_s(dest, destlen, Buff, _TRUNCATE);
+			dest[0] = '0';
+			dest[1] = 0;
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "family") == 0)
+		else if (_stricmp(Metadata, "family") == 0)
 		{
 			wcsncpy_s(dest, destlen, L"The True Audio File", _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "lossless") == 0)
+		else if (_stricmp(Metadata, "lossless") == 0)
 		{
-			Buff[0] = '1';
-			wcsncpy_s(dest, destlen, Buff, _TRUNCATE);
+			dest[0] = '1';
+			dest[1] = 0;
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "title") == 0)
+		else if (_stricmp(Metadata, "title") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Title.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "artist") == 0)
+		else if (_stricmp(Metadata, "artist") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Artist.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "albumartist") == 0)
+		else if (_stricmp(Metadata, "albumartist") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.AlbumArtist.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "comment") == 0)
+		else if (_stricmp(Metadata, "comment") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Comment.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "album") == 0)
+		else if (_stricmp(Metadata, "album") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Album.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "year") == 0)
+		else if (_stricmp(Metadata, "year") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Year.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "genre") == 0)
+		else if (_stricmp(Metadata, "genre") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Genre.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "track") == 0)
+		else if (_stricmp(Metadata, "track") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Track.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "tracks") == 0)
+		else if (_stricmp(Metadata, "tracks") == 0)
 		{
 			size_t slash_pos = TagDataW.Track.find_first_of(L'/');
 			if (slash_pos != std::wstring::npos)
@@ -301,22 +302,22 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const wchar_t *Metadat
 			}
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "composer") == 0)
+		else if (_stricmp(Metadata, "composer") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Composer.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "publisher") == 0)
+		else if (_stricmp(Metadata, "publisher") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Publisher.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "disc") == 0)
+		else if (_stricmp(Metadata, "disc") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Disc.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "discs") == 0)
+		else if (_stricmp(Metadata, "discs") == 0)
 		{
 			size_t slash_pos = TagDataW.Disc.find_first_of(L'/');
 			if (slash_pos != std::wstring::npos)
@@ -329,12 +330,12 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const wchar_t *Metadat
 			}
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "bpm") == 0)
+		else if (_stricmp(Metadata, "bpm") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.BPM.c_str(), _TRUNCATE);
 			RetCode = 1;
 		}
-		else if (_stricmp(MetaData, "bitrate") == 0)
+		else if (_stricmp(Metadata, "bitrate") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.bitrate.c_str(), _TRUNCATE);
 			RetCode = 1;
@@ -354,7 +355,7 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const wchar_t *Metadat
 	return RetCode;
 }
 
-int CMediaLibrary::SetExtendedFileInfo(const wchar_t *fn, const wchar_t *Metadata, const wchar_t *val)
+int CMediaLibrary::SetExtendedFileInfo(const wchar_t *fn, const char *Metadata, const wchar_t *val)
 {
 
 	bool FindTag = false;
@@ -453,7 +454,6 @@ int CMediaLibrary::SetExtendedFileInfo(const wchar_t *fn, const wchar_t *Metadat
 
 int CMediaLibrary::WriteExtendedFileInfo()
 {
-
 	::EnterCriticalSection(&CriticalSection);
 
 	if (FileName.empty())

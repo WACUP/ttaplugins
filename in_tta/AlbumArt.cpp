@@ -22,12 +22,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <Wasabi/api/memmgr/api_memmgr.h>
 #include <Winamp/in2.h>
 #include <Winamp/wa_ipc.h>
+#include <nu/servicebuilder.h>
 #include <Wasabi/api/service/waservicefactory.h>
 #include <Agave/AlbumArt/svc_albumArtProvider.h>
 #include "AlbumArt.h"
-#include <taglib/trueaudiofile.h>
-#include <taglib/id3v2tag.h>
-#include <taglib/attachedpictureframe.h>
+#include <taglib/trueaudio/trueaudiofile.h>
+#include <taglib/mpeg/id3v2/id3v2tag.h>
+#include <taglib/mpeg/id3v2/frames/attachedpictureframe.h>
 #include <taglib/tag.h>
 
 #include "MediaLibrary.h"
@@ -41,96 +42,35 @@ public:
 	const char *GetServiceName();
 	GUID GetGUID();
 	void *GetInterface(int global_lock);
-	int SupportNonLockingInterface();
 	int ReleaseInterface(void *ifc);
-	const char *GetTestString();
 	int ServiceNotify(int msg, int param1, int param2);
 
 protected:
 	RECVS_DISPATCH;
 };
 
-extern In_Module mod; // TODO: change if you called yours something else
-
-#define WASABI_API_MEMMGR memmgr
-
-static api_config *AGAVE_API_CONFIG = 0;
-static api_service *WASABI_API_SVC = 0;
-static api_memmgr *WASABI_API_MEMMGR = 0;
+extern In_Module plugin; // TODO: change if you called yours something else
 
 static AlbumArtFactory albumArtFactory;
 
 void Wasabi_Init()
 {
-	WASABI_API_SVC = (api_service *)SendMessage(mod.hMainWindow, WM_WA_IPC, 0, IPC_GET_API_SERVICE);
-
-	if (WASABI_API_SVC == 0 || WASABI_API_SVC == (api_service *)1)
-	{
-		WASABI_API_SVC = 0;
-		return;
-	}
-
-	WASABI_API_SVC->service_register(&albumArtFactory);
-
-	waServiceFactory *sf = (waServiceFactory *)WASABI_API_SVC->service_getServiceByGuid(AgaveConfigGUID);
-
-	if (sf)
-	{
-		AGAVE_API_CONFIG = (api_config *)sf->getInterface();
-	}
-	else
-	{
-		// Do nothing
-	}
-
-	sf = (waServiceFactory *)WASABI_API_SVC->service_getServiceByGuid(memMgrApiServiceGuid);
-
-	if (sf)
-	{
-		WASABI_API_MEMMGR = (api_memmgr *)sf->getInterface();
-	}
-	else
-	{
-		// Do nothing
-	}
+	plugin.service->service_register(&albumArtFactory);
 }
 
 void Wasabi_Quit()
 {
-	if (WASABI_API_SVC)
-	{
-		waServiceFactory *sf = (waServiceFactory *)WASABI_API_SVC->service_getServiceByGuid(AgaveConfigGUID);
-		if (sf)
-		{
-			sf->releaseInterface(AGAVE_API_CONFIG);
-		}
-		else
-		{
-			// Do nothing
-		}
-
-		sf = (waServiceFactory *)WASABI_API_SVC->service_getServiceByGuid(memMgrApiServiceGuid);
-		if (sf)
-		{
-			sf->releaseInterface(WASABI_API_MEMMGR);
-		}
-		else
-		{
-			// Do nothing
-		}
-
-		WASABI_API_SVC->service_deregister(&albumArtFactory);
-	}
+	plugin.service->service_deregister(&albumArtFactory);
 }
 
 void *Wasabi_Malloc(size_t size_in_bytes)
 {
-	return WASABI_API_MEMMGR->sysMalloc(size_in_bytes);
+	return plugin.memmgr->sysMalloc(size_in_bytes);
 }
 
 void Wasabi_Free(void *memory_block)
 {
-	WASABI_API_MEMMGR->sysFree(memory_block);
+	plugin.memmgr->sysFree(memory_block);
 }
 
 class TTA_AlbumArtProvider : public svc_albumArtProvider
@@ -144,6 +84,7 @@ public:
 	int GetAlbumArtData(const wchar_t *filename, const wchar_t *type, void **bits, size_t *len, wchar_t **mimeType);
 	int SetAlbumArtData(const wchar_t *filename, const wchar_t *type, void *bits, size_t len, const wchar_t *mimeType);
 	int DeleteAlbumArt(const wchar_t *filename, const wchar_t *type);
+
 protected:
 	RECVS_DISPATCH;
 	CRITICAL_SECTION	CriticalSection;
@@ -267,7 +208,7 @@ bool TTA_AlbumArtProvider::IsMine(const wchar_t *filename)
 	const wchar_t *extension = extensionW(filename);
 	if (extension && *extension)
 	{
-		return ((_wcsicmp(extension, L"tta") == 0) | (_wcsicmp(extension, L"TTA") == 0)) ? true : false;
+		return ((_wcsicmp(extension, L"TTA") == 0)) ? true : false;
 	}
 	else
 	{
@@ -283,7 +224,6 @@ int TTA_AlbumArtProvider::ProviderType()
 
 int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t *type, void **bits, size_t *len, wchar_t **mime_type)
 {
-
 	size_t tag_size = 0;
 	int retval = ALBUMARTPROVIDER_FAILURE;
 	size_t string_len = 0;
@@ -492,7 +432,6 @@ static TTA_AlbumArtProvider albumArtProvider;
 static const GUID TTA_albumArtproviderGUID =
 { 0xbb653840, 0x6dab, 0x4867, { 0x9f, 0x42, 0xa7, 0x72, 0xe4, 0x05, 0x8c, 0x81 } };
 
-
 FOURCC AlbumArtFactory::GetServiceType()
 {
 	return svc_albumArtProvider::SERVICETYPE;
@@ -513,19 +452,9 @@ void *AlbumArtFactory::GetInterface(int global_lock)
 	return &albumArtProvider;
 }
 
-int AlbumArtFactory::SupportNonLockingInterface()
-{
-	return 1;
-}
-
 int AlbumArtFactory::ReleaseInterface(void *ifc)
 {
 	return 1;
-}
-
-const char *AlbumArtFactory::GetTestString()
-{
-	return 0;
 }
 
 int AlbumArtFactory::ServiceNotify(int msg, int param1, int param2)
@@ -539,9 +468,7 @@ CB(WASERVICEFACTORY_GETSERVICETYPE, GetServiceType)
 CB(WASERVICEFACTORY_GETSERVICENAME, GetServiceName)
 CB(WASERVICEFACTORY_GETGUID, GetGUID)
 CB(WASERVICEFACTORY_GETINTERFACE, GetInterface)
-CB(WASERVICEFACTORY_SUPPORTNONLOCKINGGETINTERFACE, SupportNonLockingInterface)
 CB(WASERVICEFACTORY_RELEASEINTERFACE, ReleaseInterface)
-CB(WASERVICEFACTORY_GETTESTSTRING, GetTestString)
 CB(WASERVICEFACTORY_SERVICENOTIFY, ServiceNotify)
 END_DISPATCH;
 #undef CBCLASS

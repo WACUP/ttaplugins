@@ -20,13 +20,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #if !defined(AFX_MediaLibrary_H__997DC726_50DB_46B4_A156_DB5E92EC2BE8__INCLUDED_)
 #define AFX_MediaLibrary_H__997DC726_50DB_46B4_A156_DB5E92EC2BE8__INCLUDED_
 
-#include "..\Winamp SDK\Winamp\wa_ipc.h"
+#include <winamp\wa_ipc.h>
 
-#include <taglib/tstring.h>
-#include <taglib/trueaudiofile.h>
-#include <taglib/attachedpictureframe.h>
-
-#include "in_tta.h"
+#include <taglib/toolkit/tstring.h>
+#include <taglib/trueaudio/trueaudiofile.h>
+#include <taglib/mpeg/id3v2/frames/attachedpictureframe.h>
 
 static const __int32 MAX_MUSICTEXT = 512;
 static const __int32 MAX_YEAR = 10;
@@ -55,10 +53,10 @@ class CMediaLibrary
 public:
 	CMediaLibrary();
 	virtual ~CMediaLibrary();
-	__int32  GetExtendedFileInfo(const wchar_t *fn, const wchar_t *Metadata, wchar_t *dest, size_t destlen);
-	__int32  SetExtendedFileInfo(const wchar_t *fn, const wchar_t *Metadata, const wchar_t *val);
+	__int32  GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, wchar_t *dest, const size_t destlen);
+	__int32  SetExtendedFileInfo(const wchar_t *fn, const char *Metadata, const wchar_t *val);
 	__int32  WriteExtendedFileInfo();
-	void FlushCache(void);
+	void FlushCache(const bool skipLock = false);
 	std::wstring GetCurrentFileName() { return FileName; };
 	bool	isValid() { return isValidFile; };
 

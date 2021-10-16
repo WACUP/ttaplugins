@@ -32,9 +32,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="resource.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
     <ResourceCompile Include="in_tta.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
