@@ -1,0 +1,6 @@
+[submodule "enc_tta"]
+	path = enc_tta
+	url = https://github.com/bunbun042000/enc_tta.git
+[submodule "in_tta"]
+	path = in_tta
+	url = https://github.com/bunbun042000/in_tta.git
