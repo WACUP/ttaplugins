@@ -251,10 +251,6 @@ int play(const wchar_t *filename)
 	{
 		return 1;
 	}
-	else
-	{
-		// Do nothing
-	}
 
 	try
 	{
@@ -273,10 +269,6 @@ int play(const wchar_t *filename)
 	{
 		stop();
 		return 1;
-	}
-	else
-	{
-		// Do nothing
 	}
 
 	// setup information display
@@ -312,10 +304,6 @@ void pause(void)
 	{
 		playing_ttafile.SetPaused(1);
 	}
-	else
-	{
-		// do nothing
-	}
 
 	plugin.outMod->Pause(1);
 }
@@ -325,10 +313,6 @@ void unpause(void)
 	if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
 	{
 		playing_ttafile.SetPaused(0);
-	}
-	else
-	{
-		// do nothing
 	}
 
 	plugin.outMod->Pause(0);
@@ -352,12 +336,7 @@ void stop(void)
 		CloseHandle(decoder_handle);
 		decoder_handle = INVALID_HANDLE_VALUE;
 	}
-	else
-	{
-		// Do nothing
-	}
 
-	plugin.SetInfo(0, 0, 0, 1);
 	plugin.outMod->Close();
 	plugin.SAVSADeInit();
 }
@@ -388,11 +367,6 @@ void setoutputtime(int time_in_ms)
 	{
 		playing_ttafile.SetSeekNeeded(time_in_ms);
 	}
-	else
-	{
-		// do nothing
-	}
-
 }
 
 void setvolume(int volume)
@@ -413,10 +387,6 @@ static void do_vis(unsigned char *data, int count, int bps, long double position
 		plugin.SAAddPCMData(data, playing_ttafile.GetNumberofChannel(), bps, (int)position);
 		plugin.VSAAddPCMData(data, playing_ttafile.GetNumberofChannel(), bps, (int)position);
 	}
-	else
-	{
-		// Do nothing
-	}
 }
 
 DWORD WINAPI __stdcall DecoderThread(void *p)
@@ -431,12 +401,6 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 		done = 1;
 		return 0;
 	}
-	else
-	{
-		// do nothing
-	}
-
-	int bitrate = playing_ttafile.GetBitrate();
 
 	while (!killDecoderThread)
 	{
@@ -446,18 +410,10 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 			PostMessage(plugin.hMainWindow, WM_WA_MPEG_EOF, 0, 0);
 			return 0;
 		}
-		else
-		{
-			// Do nothing
-		}
 
 		if (playing_ttafile.GetSeekNeeded() != -1)
 		{
 			plugin.outMod->Flush((int)playing_ttafile.SeekPosition(&done));
-		}
-		else
-		{
-			// do nothing
 		}
 
 		if (done)
@@ -467,10 +423,6 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 				PostMessage(plugin.hMainWindow, WM_WA_MPEG_EOF, 0, 0);
 				return 0;
 			}
-			else
-			{
-				plugin.SetInfo(bitrate, playing_ttafile.GetSampleRate() / 1000, playing_ttafile.GetNumberofChannel(), 1);
-			}
 		}
 		else if (plugin.outMod->CanWrite() >=
 			((PLAYING_BUFFER_LENGTH * playing_ttafile.GetNumberofChannel() *
@@ -478,13 +430,12 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 		{
 			try
 			{
-				decoded_samples = playing_ttafile.GetSamples(pcm_buffer, PLAYING_BUFFER_SIZE, &bitrate);
+				decoded_samples = playing_ttafile.GetSamples(pcm_buffer, PLAYING_BUFFER_SIZE);
 			}
 			catch (CDecodeFile_exception &ex)
 			{
 				tta_error_message(ex.code(), playing_ttafile.GetFileName());
 				PostMessage(plugin.hMainWindow, WM_WA_MPEG_EOF, 0, 0);
-				plugin.SetInfo(0, 0, 0, 1);
 				plugin.outMod->Close();
 				plugin.SAVSADeInit();
 				return 0;
@@ -502,20 +453,13 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 					decoded_samples = plugin.dsp_dosamples(reinterpret_cast<short*>(pcm_buffer), decoded_samples, playing_ttafile.GetOutputBPS(),
 						playing_ttafile.GetNumberofChannel(), playing_ttafile.GetSampleRate());
 				}
-				else
-				{
-					// Do nothing
-				}
+
 				plugin.outMod->Write(reinterpret_cast<char *>(pcm_buffer), decoded_samples * playing_ttafile.GetNumberofChannel()
 					* (playing_ttafile.GetOutputBPS() >> 3));
 			}
-
-			plugin.SetInfo(bitrate, playing_ttafile.GetSampleRate() / 1000, playing_ttafile.GetNumberofChannel(), 1);
 		}
 		else
 		{
-			plugin.SetInfo(bitrate, playing_ttafile.GetSampleRate() / 1000, playing_ttafile.GetNumberofChannel(), 1);
-
 			Sleep(1);
 		}
 
@@ -550,10 +494,6 @@ extern "C"
 		if (PathIsURL(fn))
 		{
 			return 0;
-		}
-		else
-		{
-			// Do nothing
 		}
 
 		return 1;
@@ -607,10 +547,6 @@ extern "C"
 		{
 			return (intptr_t)0;
 		}
-		else
-		{
-			// do nothing
-		}
 
 		try
 		{
@@ -654,14 +590,10 @@ extern "C"
 		{
 			return (intptr_t)-1;
 		}
-		else
-		{
-			// do nothing
-		}
 
 		try
 		{
-			decoded_samples = dec->GetSamples((BYTE *)dest, len, NULL);
+			decoded_samples = dec->GetSamples((BYTE *)dest, len);
 		}
 		catch (CDecodeFile_exception &ex)
 		{
@@ -673,11 +605,6 @@ extern "C"
 		{
 			decoded_bytes = decoded_samples * dec->GetBitsperSample() / 8 * dec->GetNumberofChannel();
 		}
-		else
-		{
-			// Do nothing
-		}
-
 
 		return (intptr_t)decoded_bytes;
 	}

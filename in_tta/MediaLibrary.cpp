@@ -184,14 +184,6 @@ bool CMediaLibrary::GetTagInfo(const std::wstring fn)
 			TagDataW.Track = temp_track.str();
 
 		}
-		else
-		{
-			// do nothing.
-		}
-	}
-	else
-	{
-		// Do nothing
 	}
 
 	return true;
@@ -210,10 +202,6 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 		if (FindTag)
 		{
 			FileName = std::wstring(fn);
-		}
-		else
-		{
-			// Do nothing
 		}
 	}
 	else
@@ -296,10 +284,7 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 			{
 				wcsncpy_s(dest, destlen, TagDataW.Track.substr(slash_pos + 1).c_str(), _TRUNCATE);
 			}
-			else
-			{
-				// Do nothing
-			}
+
 			RetCode = 1;
 		}
 		else if (_stricmp(Metadata, "composer") == 0)
@@ -324,10 +309,7 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 			{
 				wcsncpy_s(dest, destlen, TagDataW.Disc.substr(slash_pos + 1).c_str(), _TRUNCATE);
 			}
-			else
-			{
-				// Do nothing
-			}
+
 			RetCode = 1;
 		}
 		else if (_stricmp(Metadata, "bpm") == 0)
@@ -470,10 +452,6 @@ int CMediaLibrary::WriteExtendedFileInfo()
 			::LeaveCriticalSection(&CriticalSection);
 			return 0;
 		}
-		else
-		{
-			// do nothing
-		}
 
 		if (NULL != TTAFile.ID3v2Tag(true))
 		{
@@ -514,13 +492,9 @@ int CMediaLibrary::WriteExtendedFileInfo()
 			TTAFile.ID3v1Tag()->setTrack(_wtoi(TagDataW.Track.c_str()));
 			TTAFile.ID3v1Tag()->setGenre(TagDataW.Genre);
 		}
-		else
-		{
-			// do nothing.
-		}
+
 		TTAFile.save();
 	}
-
 
 	::LeaveCriticalSection(&CriticalSection);
 

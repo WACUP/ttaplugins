@@ -64,9 +64,6 @@ CDecodeFile::~CDecodeFile(void)
 		::CloseHandle(decoderFileHANDLE);
 		decoderFileHANDLE = INVALID_HANDLE_VALUE;
 	}
-	else {
-		// do nothing
-	}
 
 	paused = 0;
 	seek_needed = -1;
@@ -86,9 +83,7 @@ CDecodeFile::~CDecodeFile(void)
 		TTA->~tta_decoder();
 		TTA = NULL;
 	}
-	else {
-		// do nothing
-	}
+
 	::LeaveCriticalSection(&CriticalSection);
 
 	::DeleteCriticalSection(&CriticalSection);
@@ -138,9 +133,6 @@ int CDecodeFile::SetFileName(const wchar_t *filename)
 			reinterpret_cast<tta::tta_decoder*>(TTA)->~tta_decoder();
 			TTA = NULL;
 		}
-		else {
-			// do nothing
-		}
 
 		::CloseHandle(decoderFileHANDLE);
 		decoderFileHANDLE = INVALID_HANDLE_VALUE;
@@ -188,9 +180,6 @@ long double CDecodeFile::SeekPosition(int *done)
 		::LeaveCriticalSection(&CriticalSection);
 		return (double)0;
 	}
-	else {
-		// do nothing
-	}
 
 	try {
 		TTA->set_position((TTAuint32)(decode_pos_ms / 1000.), &new_pos);
@@ -206,7 +195,7 @@ long double CDecodeFile::SeekPosition(int *done)
 	return decode_pos_ms;
 }
 
-int  CDecodeFile::GetSamples(BYTE *buffer, size_t buffersize, int *current_bitrate)
+int  CDecodeFile::GetSamples(BYTE *buffer, size_t buffersize)
 {
 	int skip_len = 0;
 	int len = 0;
@@ -216,10 +205,6 @@ int  CDecodeFile::GetSamples(BYTE *buffer, size_t buffersize, int *current_bitra
 	{
 		return 0; // no decode data
 	}
-	else
-	{
-		// do nothing
-	}
 
 	::EnterCriticalSection(&CriticalSection);
 
@@ -227,10 +212,6 @@ int  CDecodeFile::GetSamples(BYTE *buffer, size_t buffersize, int *current_bitra
 	{
 		::LeaveCriticalSection(&CriticalSection);
 		throw CDecodeFile_exception(TTA_MEMORY_ERROR);
-	}
-	else
-	{
-		// do nothing
 	}
 
 	try {
@@ -245,14 +226,6 @@ int  CDecodeFile::GetSamples(BYTE *buffer, size_t buffersize, int *current_bitra
 	if (len != 0) {
 		skip_len += len;
 		decode_pos_ms += (__int32)(skip_len * 1000. / tta_info.sps);
-		if (current_bitrate)
-		{
-		*current_bitrate = TTA->get_rate();
-	}
-	}
-	else
-	{
-		// Do nothing
 	}
 
 	::LeaveCriticalSection(&CriticalSection);
@@ -268,9 +241,6 @@ void CDecodeFile::SetOutputBPS(unsigned long bps)
 	if (NULL == TTA) {
 		::LeaveCriticalSection(&CriticalSection);
 		throw CDecodeFile_exception(TTA_MEMORY_ERROR);
-	}
-	else {
-		// do nothing
 	}
 
 	try {
