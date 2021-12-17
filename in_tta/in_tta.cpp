@@ -177,12 +177,12 @@ void config(HWND hwndParent)
 {
 	wchar_t message[2048] = { 0 }, title[256] = { L"True Audio Decoder" };
 	StringCchPrintf(message, ARRAYSIZE(message), L"%s\nCopyright © 2003 Alexander "
-					L"Djourik\nCopyright © 2005-2021 Yamagta Fumihiro. All rights "
+					L"Djourik\nCopyright © 2005-2022 Yamagta Fumihiro. All rights "
 					L"reserved.\n\nWACUP modifications by Darren Owen aka DrO (%s)"
 					L"\n\nBuild date: %s\n\nUsing libtta c++ v2.3 & based on the "
 					L"source code from https://github.com/bunbun042000/ttaplugins-winamp\n\n"
 					L"Originally by Alexander Djourik, Pavel Zhilin & Anton Gorbunov.",
-					(LPCWSTR)plugin.description, L"2021", TEXT(__DATE__));
+					(LPCWSTR)plugin.description, L"2021-2022", TEXT(__DATE__));
 	AboutMessageBox(hwndParent, message, title);
 }
 

@@ -79,7 +79,7 @@ public:
 	TTA_AlbumArtProvider();
 	virtual ~TTA_AlbumArtProvider();
 	bool IsMine(const wchar_t *filename);
-	int ProviderType();
+	int ProviderType(void);
 	// implementation note: use WASABI_API_MEMMGR to alloc bits and mimetype, so that the recipient can free through that
 	int GetAlbumArtData(const wchar_t *filename, const wchar_t *type, void **bits, size_t *len, wchar_t **mimeType);
 	int SetAlbumArtData(const wchar_t *filename, const wchar_t *type, void *bits, size_t len, const wchar_t *mimeType);
@@ -187,7 +187,7 @@ bool TTA_AlbumArtProvider::IsMine(const wchar_t *filename)
 	return false;
 }
 
-int TTA_AlbumArtProvider::ProviderType()
+int TTA_AlbumArtProvider::ProviderType(void)
 {
 	return ALBUMARTPROVIDER_TYPE_EMBEDDED;
 }
