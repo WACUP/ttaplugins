@@ -61,8 +61,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,62,2,0
- PRODUCTVERSION 3,62,2,0
+ FILEVERSION 3,64,6,0
+ PRODUCTVERSION 3,64,6,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -77,14 +77,14 @@ BEGIN
     BEGIN
         BLOCK "080904b0"
         BEGIN
-            VALUE "CompanyName", "WACUP (WinAmp Community Update Project)"
-            VALUE "FileDescription", "Winamp Input Plug-in"
-            VALUE "FileVersion", "3.62.2.0"
+            VALUE "CompanyName", "WACUP"
+            VALUE "FileDescription", "Input Plug-in"
+            VALUE "FileVersion", "3.64.6.0"
             VALUE "InternalName", "in_tta.dll"
             VALUE "LegalCopyright", "Copyright © 2003 Alexander Djourik & copyright © 2005-2022 Yamagta Fumihiro. All rights reserved. WACUP related modifications by Darren Owen aka DrO (2021-2022)"
             VALUE "OriginalFilename", "in_tta.dll"
             VALUE "ProductName", "True Audio (TTA) Decoder"
-            VALUE "ProductVersion", "3.62.2.0"
+            VALUE "ProductVersion", "3.64.6.0"
         END
     END
     BLOCK "VarFileInfo"

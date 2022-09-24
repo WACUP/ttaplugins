@@ -29,6 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <Winamp/wa_ipc.h>
 #include <mmsystem.h>
 #include <Wasabi/bfc/platform/platform.h>
+#define WA_UTILS_SIMPLE
+#include <../loader/loader/utils.h>
+#include <../loader/hook/get_api_service.h>
 
 #include <strsafe.h>
 
@@ -75,12 +78,11 @@ void GetLocalisationApiService(void)
 	if (!WASABI_API_LNG)
 	{
 		// loader so that we can get the localisation service api for use
-		if (!WASABI_API_SVC)
+		if (WASABI_API_SVC == NULL)
 		{
-			WASABI_API_SVC = (api_service*)SendMessage(winampwnd, WM_WA_IPC, 0, IPC_GET_API_SERVICE);
-			if (WASABI_API_SVC == (api_service*)1)
+			WASABI_API_SVC = GetServiceAPIPtr();
+			if (WASABI_API_SVC == NULL)
 			{
-				WASABI_API_SVC = NULL;
 				return;
 			}
 		}
@@ -104,7 +106,7 @@ extern "C"
 		if (idx == 0)
 		{
 			GetLocalisationApiService();
-			StringCchPrintfA(desc, 1024, WASABI_API_LNGSTRING(IDS_ENC_TTA_DESC), VERSION_CHAR);
+			ConfigBuildName(desc, WASABI_API_LNGSTRING(IDS_ENC_TTA_DESC), VERSION_CHAR, "");
 			return mmioFOURCC('T', 'T', 'A', ' ');
 		}
 		return 0;
@@ -131,7 +133,9 @@ extern "C"
 
 	void __declspec(dllexport) FinishAudio3(const char *filename, AudioCoder *coder)
 	{
-		((AudioCoderTTA*)coder)->FinishAudio(filename);
+		wchar_t wfilename[MAX_PATHLEN + 1] = { 0 };
+		MultiByteToWideChar(CP_ACP, 0, filename, -1, wfilename, MAX_PATHLEN);
+		((AudioCoderTTA*)coder)->FinishAudio(wfilename);
 	}
 
 	void __declspec(dllexport) FinishAudio3W(const wchar_t *filename, AudioCoder *coder)
@@ -156,8 +160,8 @@ extern "C"
 		{
 		case WM_INITDIALOG:
 			wr = (configwndrec *)lParam;
-			//			SendMessage(GetDlgItem(hwndDlg, IDC_COMPRESSIONSLIDER), TBM_SETRANGE, TRUE, MAKELONG(0, 12));
-			//			SendMessage(GetDlgItem(hwndDlg, IDC_COMPRESSIONSLIDER), TBM_SETPOS, TRUE, wr->cfg.compression);
+			//			SendDlgItemMessage(hwndDlg, IDC_COMPRESSIONSLIDER, TBM_SETRANGE, TRUE, MAKELONG(0, 12));
+			//			SendDlgItemMessage(hwndDlg, IDC_COMPRESSIONSLIDER, TBM_SETPOS, TRUE, wr->cfg.compression);
 			break;
 
 		case WM_NOTIFY:
@@ -165,7 +169,7 @@ extern "C"
 			//			{
 			//				LPNMHDR l = (LPNMHDR)lParam;
 			//				if (l->idFrom == IDC_COMPRESSIONSLIDER)
-			//					wr->cfg.compression = SendMessage(GetDlgItem(hwndDlg, IDC_COMPRESSIONSLIDER), TBM_GETPOS, 0, 0);
+			//					wr->cfg.compression = SendDlgItemMessage(hwndDlg, IDC_COMPRESSIONSLIDER, TBM_GETPOS, 0, 0);
 			//			}
 			break;
 
@@ -255,6 +259,7 @@ static void tta_error_message(int error, const wchar_t *filename)
 	}
 
 	MessageBox(winampwnd, message, L"TTA Decoder Error",
-		MB_OK | MB_ICONERROR | MB_SYSTEMMODAL);
+						  MB_ICONERROR | MB_SYSTEMMODAL);
+}
 
 }

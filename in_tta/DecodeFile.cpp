@@ -195,7 +195,7 @@ long double CDecodeFile::SeekPosition(int *done)
 	return decode_pos_ms;
 }
 
-int  CDecodeFile::GetSamples(BYTE *buffer, size_t buffersize)
+int  CDecodeFile::GetSamples(BYTE *buffer, TTAuint32 buffersize)
 {
 	int skip_len = 0;
 	int len = 0;

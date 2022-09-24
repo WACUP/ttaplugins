@@ -65,12 +65,12 @@ static volatile int killDecoderThread = 0;
 CMediaLibrary m_ReadTag;
 CMediaLibrary m_WriteTag;
 
-void config(HWND hwndParent);
+void about(HWND hwndParent);
 int init(void);
 void quit(void);
 void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms);
 int  infodlg(const wchar_t *file, HWND hwndParent);
-int  isourfile(const wchar_t *fn);
+//int  isourfile(const wchar_t *fn);
 int  play(const wchar_t *fn);
 void pause(void);
 void unpause(void);
@@ -91,13 +91,13 @@ In_Module plugin = {
 	NULL,		// filled in later
 	1,			// is_seekable
 	1,			// uses output
-	config,
-	config,
+	NULL,
+	about,
 	init,
 	quit,
 	getfileinfo,
 	infodlg,
-	isourfile,
+	0/*isourfile*/,
 	play,
 	pause,
 	unpause,
@@ -114,7 +114,10 @@ In_Module plugin = {
 	NULL,		// setinfo
 	NULL,		// out_mod
 	NULL,       // api_service
-	GetFileExtensions	// loading optimisation
+	INPUT_HAS_READ_META | INPUT_HAS_WRITE_META | INPUT_USES_UNIFIED_ALT3 |
+	INPUT_HAS_FORMAT_CONVERSION_UNICODE | INPUT_HAS_FORMAT_CONVERSION_SET_TIME_MODE,
+	GetFileExtensions,	// loading optimisation
+	IN_INIT_WACUP_END_STRUCT
 };
 
 void GetFileExtensions(void)
@@ -169,11 +172,11 @@ static void tta_error_message(int error, const wchar_t *filename)
 	}
 
 	TimedMessageBox(plugin.hMainWindow, message, L"True Audio Decoder Error",
-					MB_OK | MB_ICONERROR | MB_SYSTEMMODAL, 3000);
+										MB_ICONERROR | MB_SYSTEMMODAL, 3000);
 
 }
 
-void config(HWND hwndParent)
+void about(HWND hwndParent)
 {
 	wchar_t message[2048] = { 0 }, title[256] = { L"True Audio Decoder" };
 	StringCchPrintf(message, ARRAYSIZE(message), L"%s\nCopyright © 2003 Alexander "
@@ -236,10 +239,10 @@ int infodlg(const wchar_t *filename, HWND parent)
 	return 0;
 }
 
-int isourfile(const wchar_t *filename)
+/*int isourfile(const wchar_t *filename)
 {
 	return 0;
-}
+}*/
 
 int play(const wchar_t *filename)
 {
@@ -291,7 +294,9 @@ int play(const wchar_t *filename)
 	}
 	else
 	{
-		SetThreadPriority(decoder_handle, plugin.config->GetInt(playbackConfigGroupGUID, L"priority", THREAD_PRIORITY_HIGHEST));
+		SetThreadPriority(decoder_handle, (int)plugin.config->GetInt(
+						  playbackConfigGroupGUID, L"priority",
+						  THREAD_PRIORITY_HIGHEST));
 		ResumeThread(decoder_handle);
 	}
 
@@ -407,7 +412,7 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 		if (!playing_ttafile.isDecodable())
 		{
 			tta_error_message(-1, L"");
-			PostMessage(plugin.hMainWindow, WM_WA_MPEG_EOF, 0, 0);
+			PostEOF();
 			return 0;
 		}
 
@@ -418,11 +423,10 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 
 		if (done)
 		{
-			if (!plugin.outMod->IsPlaying())
-			{
-				PostMessage(plugin.hMainWindow, WM_WA_MPEG_EOF, 0, 0);
-				return 0;
-			}
+			PostEOF();
+			plugin.outMod->Close();
+			plugin.SAVSADeInit();
+			break;
 		}
 		else if (plugin.outMod->CanWrite() >=
 			((PLAYING_BUFFER_LENGTH * playing_ttafile.GetNumberofChannel() *
@@ -435,10 +439,10 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 			catch (CDecodeFile_exception &ex)
 			{
 				tta_error_message(ex.code(), playing_ttafile.GetFileName());
-				PostMessage(plugin.hMainWindow, WM_WA_MPEG_EOF, 0, 0);
+				PostEOF();
 				plugin.outMod->Close();
 				plugin.SAVSADeInit();
-				return 0;
+				break;
 			}
 
 			if (decoded_samples == 0)
@@ -462,7 +466,6 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 		{
 			Sleep(1);
 		}
-
 	}
 
 	return 0;
@@ -486,17 +489,11 @@ extern "C"
 		// this will be called when Winamp is requested to show a File Info dialog for the selected file(s)
 		// and this will allow you to override or forceable ignore the handling of a file or format
 		// e.g. this will allow streams/urls to be ignored
-		/*if (!_strnicmp(fn, "file://", 7))
+		/*if (SameStrNA(fn, "file://", 7))
 		{
 			fn += 7;
 		}*/
-
-		if (PathIsURL(fn))
-		{
-			return 0;
-		}
-
-		return 1;
+		return !IsPathURL(fn);
 	}
 
 	// should return a child window of 513x271 pixels (341x164 in msvc dlg units), or return NULL for no tab.
@@ -570,7 +567,7 @@ extern "C"
 		{
 		*srate = dec->GetSampleRate();
 		}
-		if (size)
+		if (size && bps && nch)
 		{
 		*size = dec->GetDataLength() * (*bps / 8) * (*nch);
 		}

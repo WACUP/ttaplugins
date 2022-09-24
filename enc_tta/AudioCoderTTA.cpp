@@ -572,7 +572,7 @@ void AudioCoderTTA::process_stream()
 	TTAuint8 *pend = input_data_buffer.buffer + input_data_buffer.current_end_pos;
 	TTAint32 curr, next, temp;
 	TTAint32 res = 0;
-	TTAint32 in_bytes = input_data_buffer.current_end_pos - input_data_buffer.current_pos;
+	TTAint32 in_bytes = (TTAint32)(input_data_buffer.current_end_pos - input_data_buffer.current_pos);
 
 	if (!in_bytes) return;
 
@@ -810,7 +810,7 @@ int AudioCoderTTA::Encode(int framepos, void *in0, int in_avail, int *in_used, v
 			}
 			if (input_data_buffer.current_pos < input_data_buffer.current_end_pos || (lastblock == 1 && in_avail == *in_used))
 			{
-				samplecount += (input_data_buffer.current_end_pos - input_data_buffer.current_pos) / smp_size;
+				samplecount += (int)((input_data_buffer.current_end_pos - input_data_buffer.current_pos) / smp_size);
 				process_stream();
 				if (lastblock)
 				{
@@ -886,7 +886,7 @@ void AudioCoderTTA::FinishAudio(const wchar_t *filename)
 	const size_t BUFSIZE = 65536;
 	TTAuint8 *chBuffer;
 	chBuffer = new TTAuint8[BUFSIZE];
-
+#if 0
 	if (wcsnlen(filename, MAX_PATHLEN) > MAX_PATH)
 	{
 		throw AudioCoderTTA_exception(TTA_WRITE_ERROR);
@@ -896,7 +896,7 @@ void AudioCoderTTA::FinishAudio(const wchar_t *filename)
 	{
 		// Do nothing
 	}
-
+#endif
 	std::wstring temppath = std::wstring(filename);
 	size_t lastposofpath;
 	lastposofpath = temppath.rfind(L'\\');
@@ -1046,10 +1046,10 @@ void AudioCoderTTA::FinishAudio(const wchar_t *filename)
 	chBuffer = nullptr;
 }
 
-void AudioCoderTTA::FinishAudio(const char *filename)
+/*void AudioCoderTTA::FinishAudio(const char *filename)
 {
 	wchar_t *wfilename = new wchar_t[MAX_PATHLEN + 1];
 	size_t converted = 0;
 	mbstowcs_s(&converted, wfilename, MAX_PATHLEN, filename, MAX_PATHLEN);
 	FinishAudio(wfilename);
-}
+}*/

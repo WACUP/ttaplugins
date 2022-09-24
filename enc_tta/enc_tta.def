@@ -1,0 +1,11 @@
+LIBRARY	"enc_tta"
+EXPORTS
+
+SetWinampHWND @1
+GetAudioTypes3 @2
+CreateAudio3 @3
+FinishAudio3 @4
+PrepareToFinish @5
+ConfigAudio3 @6
+GetConfigItem @7
+SetConfigItem @8

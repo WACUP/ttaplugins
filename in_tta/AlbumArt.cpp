@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <taglib/mpeg/id3v2/id3v2tag.h>
 #include <taglib/mpeg/id3v2/frames/attachedpictureframe.h>
 #include <taglib/tag.h>
+#include <loader/loader/utils.h>
 
 #include "MediaLibrary.h"
 
@@ -182,7 +183,7 @@ bool TTA_AlbumArtProvider::IsMine(const wchar_t *filename)
 	const wchar_t *extension = extensionW(filename);
 	if (extension && *extension)
 	{
-		return ((_wcsicmp(extension, L"TTA") == 0)) ? true : false;
+		return (SameStr(extension, L"TTA")) ? true : false;
 	}
 	return false;
 }
@@ -201,7 +202,7 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 
 	::EnterCriticalSection(&CriticalSection);
 
-	if (_wcsicmp(type, L"cover"))
+	if (!SameStr(type, L"cover"))
 	{
 		::LeaveCriticalSection(&CriticalSection);
 		return retval;
@@ -213,7 +214,7 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 		return retval;
 	}
 
-	if (!isSucceed || _wcsicmp(FileName.c_str(), filename))
+	if (!isSucceed || !SameStr(FileName.c_str(), filename))
 	{
 		FileName = filename;
 
@@ -289,7 +290,6 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 
 int TTA_AlbumArtProvider::SetAlbumArtData(const wchar_t *filename, const wchar_t *type, void *bits, size_t len, const wchar_t *mime_type)
 {
-
 	int retval = ALBUMARTPROVIDER_FAILURE;
 	TagLib::String mimeType(L"");
 	int size = 0;
@@ -323,7 +323,7 @@ int TTA_AlbumArtProvider::SetAlbumArtData(const wchar_t *filename, const wchar_t
 	{
 		mimeType = L"image/";
 		mimeType += mime_type;
-		size = len;
+		size = (int)len;
 		artType = TagLib::ID3v2::AttachedPictureFrame::FrontCover;
 		AlbumArt.setData((const char *)bits, (TagLib::uint)size);
 	}
@@ -358,7 +358,7 @@ CB(SVC_ALBUMARTPROVIDER_DELETEALBUMART, DeleteAlbumArt);
 END_DISPATCH;
 #undef CBCLASS
 
-static TTA_AlbumArtProvider albumArtProvider;
+TTA_AlbumArtProvider *albumArtProvider = NULL;
 
 // {bb653840-6dab-4867-9f42-A772E4068C81}
 static const GUID TTA_albumArtproviderGUID =
@@ -381,7 +381,11 @@ GUID AlbumArtFactory::GetGUID()
 
 void *AlbumArtFactory::GetInterface(int global_lock)
 {
-	return &albumArtProvider;
+	if (!albumArtProvider)
+	{
+		albumArtProvider = new TTA_AlbumArtProvider();
+	}
+	return albumArtProvider;
 }
 
 int AlbumArtFactory::ReleaseInterface(void *ifc)

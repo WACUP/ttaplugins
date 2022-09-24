@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 #include <iomanip>
 #include <strsafe.h>
+#include <loader/loader/utils.h>
 
 //////////////////////////////////////////////////////////////////////
 // Create / Destroy
@@ -194,6 +195,25 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 	bool FindTag;
 	int RetCode;
 
+	if (_stricmp(Metadata, "type") == 0)
+	{
+		dest[0] = '0';
+		dest[1] = 0;
+		return 1;
+	}
+	else if (_stricmp(Metadata, "family") == 0)
+	{
+		// TODO localise
+		wcsncpy_s(dest, destlen, L"The True Audio File", _TRUNCATE);
+		return 1;
+	}
+	else if (_stricmp(Metadata, "lossless") == 0)
+	{
+		dest[0] = '1';
+		dest[1] = 0;
+		return 1;
+	}
+
 	::EnterCriticalSection(&CriticalSection);
 
 	if (std::wstring(fn) != FileName)
@@ -218,23 +238,6 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 		else if (_stricmp(Metadata, "formatinformation") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Format.c_str(), _TRUNCATE);
-			RetCode = 1;
-		}
-		else if (_stricmp(Metadata, "type") == 0)
-		{
-			dest[0] = '0';
-			dest[1] = 0;
-			RetCode = 1;
-		}
-		else if (_stricmp(Metadata, "family") == 0)
-		{
-			wcsncpy_s(dest, destlen, L"The True Audio File", _TRUNCATE);
-			RetCode = 1;
-		}
-		else if (_stricmp(Metadata, "lossless") == 0)
-		{
-			dest[0] = '1';
-			dest[1] = 0;
 			RetCode = 1;
 		}
 		else if (_stricmp(Metadata, "title") == 0)
@@ -488,8 +491,8 @@ int CMediaLibrary::WriteExtendedFileInfo()
 			TTAFile.ID3v1Tag()->setArtist(TagDataW.Artist);
 			TTAFile.ID3v1Tag()->setAlbum(TagDataW.Album);
 			TTAFile.ID3v1Tag()->setComment(TagDataW.Comment);
-			TTAFile.ID3v1Tag()->setYear(_wtoi(TagDataW.Year.c_str()));
-			TTAFile.ID3v1Tag()->setTrack(_wtoi(TagDataW.Track.c_str()));
+			TTAFile.ID3v1Tag()->setYear(WStr2I(TagDataW.Year.c_str()));
+			TTAFile.ID3v1Tag()->setTrack(WStr2I(TagDataW.Track.c_str()));
 			TTAFile.ID3v1Tag()->setGenre(TagDataW.Genre);
 		}
 

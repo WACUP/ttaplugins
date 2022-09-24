@@ -71,7 +71,7 @@ public:
 
 	int				SetFileName(const wchar_t *filename);
 	const wchar_t  *GetFileName() { return FileName.c_str(); }
-	int				GetSamples(BYTE *buffer, size_t buffersize);
+	int				GetSamples(BYTE *buffer, TTAuint32 buffersize);
 
 	int				GetPaused() { return paused; }
 	void			SetPaused(int p) { paused = p; }

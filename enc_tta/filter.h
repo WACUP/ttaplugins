@@ -38,11 +38,11 @@ extern int hybrid_filter_enc(TTA_fltst *fs, int *in);
 /////////////////////////////////////////////////////////////////////////////
 
 static __inline void hybrid_filter_dec(TTA_fltst *fs, TTAint32 *in) {
-	register TTAint32 *pA = fs->dl;
-	register TTAint32 *pB = fs->qm;
-	register TTAint32 *pM = fs->dx;
-	register TTAint32 sum = fs->round;
-	register __m128i xmA1, xmA2, xmB1, xmB2, xmM1, xmM2, xmDP;
+	TTAint32 *pA = fs->dl;
+	TTAint32 *pB = fs->qm;
+	TTAint32 *pM = fs->dx;
+	TTAint32 sum = fs->round;
+	__m128i xmA1, xmA2, xmB1, xmB2, xmM1, xmM2, xmDP;
 
 	xmA1 = _mm_load_si128((__m128i*)pA);
 	xmA2 = _mm_load_si128((__m128i*)(pA + 4));
@@ -89,11 +89,11 @@ static __inline void hybrid_filter_dec(TTA_fltst *fs, TTAint32 *in) {
   /////////////////////////////////////////////////////////////////////////////
 
 static __inline void hybrid_filter_enc(TTA_fltst *fs, TTAint32 *in) {
-	register TTAint32 *pA = fs->dl;
-	register TTAint32 *pB = fs->qm;
-	register TTAint32 *pM = fs->dx;
-	register TTAint32 sum = fs->round;
-	register __m128i xmA1, xmA2, xmB1, xmB2, xmM1, xmM2, xmDP;
+	TTAint32 *pA = fs->dl;
+	TTAint32 *pB = fs->qm;
+	TTAint32 *pM = fs->dx;
+	TTAint32 sum = fs->round;
+	__m128i xmA1, xmA2, xmB1, xmB2, xmM1, xmM2, xmDP;
 
 	xmA1 = _mm_load_si128((__m128i*)pA);
 	xmA2 = _mm_load_si128((__m128i*)(pA + 4));
@@ -142,10 +142,10 @@ static __inline void hybrid_filter_enc(TTA_fltst *fs, TTAint32 *in) {
 /////////////////////////////////////////////////////////////////////////////
 
 static __inline void hybrid_filter_dec(AudioCoderTTA::TTA_fltst *fs, TTAint32 *in) {
-	register TTAint32 *pA = fs->dl;
-	register TTAint32 *pB = fs->qm;
-	register TTAint32 *pM = fs->dx;
-	register TTAint32 sum = fs->round;
+	TTAint32 *pA = fs->dl;
+	TTAint32 *pB = fs->qm;
+	TTAint32 *pM = fs->dx;
+	TTAint32 sum = fs->round;
 
 	if (fs->error < 0) {
 		pB[0] -= pM[0]; pB[1] -= pM[1]; pB[2] -= pM[2]; pB[3] -= pM[3];
@@ -179,10 +179,10 @@ static __inline void hybrid_filter_dec(AudioCoderTTA::TTA_fltst *fs, TTAint32 *i
   /////////////////////////////////////////////////////////////////////////////
 
 static __inline void hybrid_filter_enc(AudioCoderTTA::TTA_fltst *fs, TTAint32 *in) {
-	register TTAint32 *pA = fs->dl;
-	register TTAint32 *pB = fs->qm;
-	register TTAint32 *pM = fs->dx;
-	register TTAint32 sum = fs->round;
+	TTAint32 *pA = fs->dl;
+	TTAint32 *pB = fs->qm;
+	TTAint32 *pM = fs->dx;
+	TTAint32 sum = fs->round;
 
 	if (fs->error < 0) {
 		pB[0] -= pM[0]; pB[1] -= pM[1]; pB[2] -= pM[2]; pB[3] -= pM[3];

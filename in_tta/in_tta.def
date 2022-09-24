@@ -2,10 +2,12 @@ LIBRARY	"in_tta"
 EXPORTS
 winampGetInModule2 @1
 winampGetExtendedFileInfoW @2
-winampAddUnifiedFileInfoPane @3
-winampUseUnifiedFileInfoDlg @4
-winampGetExtendedRead_close @5
-winampGetExtendedRead_getData @6
-winampGetExtendedRead_openW @7
-winampGetExtendedRead_setTime @8
-winampUninstallPlugin @9
+winampSetExtendedFileInfoW @3
+winampWriteExtendedFileInfo @4
+winampAddUnifiedFileInfoPane @5
+winampUseUnifiedFileInfoDlg @6
+winampGetExtendedRead_close @7
+winampGetExtendedRead_getData @8
+winampGetExtendedRead_openW @9
+winampGetExtendedRead_setTime @10
+winampUninstallPlugin @11
