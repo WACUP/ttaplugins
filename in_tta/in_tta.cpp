@@ -50,6 +50,8 @@
 
 #include <loader/loader/utils.h>
 
+#include <../wacup_version.h>
+
 const static int MAX_MESSAGE_LENGTH = 1024;
 const static __int32 PLAYING_BUFFER_LENGTH = 576;
 const static __int32 TRANSCODING_BUFFER_LENGTH = 5120;
@@ -62,8 +64,8 @@ static DWORD WINAPI __stdcall DecoderThread(void *p);
 static volatile int killDecoderThread = 0;
 
 // for MetaData static variables
-CMediaLibrary m_ReadTag;
-CMediaLibrary m_WriteTag;
+CMediaLibrary *m_ReadTag = NULL;
+CMediaLibrary *m_WriteTag = NULL;
 
 void about(HWND hwndParent);
 int init(void);
@@ -180,12 +182,12 @@ void about(HWND hwndParent)
 {
 	wchar_t message[2048] = { 0 }, title[256] = { L"True Audio Decoder" };
 	StringCchPrintf(message, ARRAYSIZE(message), L"%s\nCopyright © 2003 Alexander "
-					L"Djourik\nCopyright © 2005-2022 Yamagta Fumihiro. All rights "
+					L"Djourik\nCopyright © 2005-2023 Yamagta Fumihiro. All rights "
 					L"reserved.\n\nWACUP modifications by Darren Owen aka DrO (%s)"
 					L"\n\nBuild date: %s\n\nUsing libtta c++ v2.3 & based on the "
 					L"source code from https://github.com/bunbun042000/ttaplugins-winamp\n\n"
 					L"Originally by Alexander Djourik, Pavel Zhilin & Anton Gorbunov.",
-					(LPCWSTR)plugin.description, L"2021-2022", TEXT(__DATE__));
+					(LPCWSTR)plugin.description, L"2021-" WACUP_COPYRIGHT, TEXT(__DATE__));
 	AboutMessageBox(hwndParent, message, title);
 }
 
@@ -481,7 +483,11 @@ extern "C"
 	__declspec(dllexport) int __cdecl
 		winampGetExtendedFileInfoW(const wchar_t *fn, const char *data, wchar_t *dest, const size_t destlen)
 	{
-		return m_ReadTag.GetExtendedFileInfo(fn, data, dest, destlen);
+		if (m_ReadTag == NULL)
+		{
+			m_ReadTag = new CMediaLibrary();
+		}
+		return ((m_ReadTag != NULL) ? m_ReadTag->GetExtendedFileInfo(fn, data, dest, destlen) : 0);
 	}
 
 	__declspec(dllexport) int __cdecl winampUseUnifiedFileInfoDlg(const wchar_t * fn)
@@ -527,13 +533,20 @@ extern "C"
 	__declspec(dllexport) int __cdecl
 		winampSetExtendedFileInfoW(const wchar_t *fn, const char *data, const wchar_t *val)
 	{
-		return m_WriteTag.SetExtendedFileInfo(fn, data, val);
+		if (m_WriteTag == NULL)
+		{
+			m_WriteTag = new CMediaLibrary();
+		}
+		return ((m_WriteTag != NULL) ? m_WriteTag->SetExtendedFileInfo(fn, data, val) : 0);
 	}
 
 	__declspec(dllexport) int __cdecl winampWriteExtendedFileInfo()
 	{
-		m_ReadTag.FlushCache();
-		return m_WriteTag.WriteExtendedFileInfo();
+		if (m_ReadTag != NULL)
+		{
+			m_ReadTag->FlushCache();
+		}
+		return ((m_WriteTag != NULL) ? m_WriteTag->WriteExtendedFileInfo() : 0);
 	}
 
 	__declspec(dllexport) intptr_t __cdecl

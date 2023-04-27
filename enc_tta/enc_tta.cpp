@@ -37,8 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 HWND winampwnd = 0;
 api_service *WASABI_API_SVC = 0;
-api_language *WASABI_API_LNG = 0;
-HINSTANCE WASABI_API_LNG_HINST = 0, WASABI_API_ORIG_HINST = 0;
+
+SETUP_API_LNG_VARS;
 
 const static int MAX_MESSAGE_LENGTH = 1024;
 
