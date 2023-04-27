@@ -120,7 +120,7 @@ static const wchar_t *GetLastCharactercW(const wchar_t *string)
 		return string;
 	}
 
-	return CharPrevW(string, string + lstrlenW(string));
+	return CharPrevW(string, string + wcslen(string));
 }
 
 static const wchar_t *scanstr_backW(const wchar_t *str, const wchar_t *toscan, const wchar_t *defval)
@@ -167,7 +167,7 @@ static const wchar_t *extensionW(const wchar_t *fn)
 	const wchar_t *end = scanstr_backW(fn, L"./\\", 0);
 	if (!end)
 	{
-		return (fn + lstrlenW(fn));
+		return (fn + wcslen(fn));
 	}
 
 	if (*end == L'.')
@@ -175,7 +175,7 @@ static const wchar_t *extensionW(const wchar_t *fn)
 		return end + 1;
 	}
 
-	return (fn + lstrlenW(fn));
+	return (fn + wcslen(fn));
 }
 
 bool TTA_AlbumArtProvider::IsMine(const wchar_t *filename)
@@ -197,7 +197,7 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 {
 	size_t tag_size = 0;
 	int retval = ALBUMARTPROVIDER_FAILURE;
-	size_t string_len = 0;
+	//size_t string_len = 0;
 	TagLib::String mimeType;
 
 	::EnterCriticalSection(&CriticalSection);
@@ -266,7 +266,8 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 		}
 		else
 		{
-			mbstowcs_s(&string_len, *mime_type, extension.size() + 1, extension.toCString(), _TRUNCATE);
+			ConvertANSI(extension.toCString(), CP_ACP, *mime_type, extension.size() + 1);/*/
+			mbstowcs_s(&string_len, *mime_type, extension.size() + 1, extension.toCString(), _TRUNCATE);/**/
 			retval = ALBUMARTPROVIDER_SUCCESS;
 		}
 

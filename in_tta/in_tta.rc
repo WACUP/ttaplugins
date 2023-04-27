@@ -81,7 +81,7 @@ BEGIN
             VALUE "FileDescription", "Input Plug-in"
             VALUE "FileVersion", "3.64.6.0"
             VALUE "InternalName", "in_tta.dll"
-            VALUE "LegalCopyright", "Copyright © 2003 Alexander Djourik & copyright © 2005-2022 Yamagta Fumihiro. All rights reserved. WACUP related modifications by Darren Owen aka DrO (2021-2022)"
+            VALUE "LegalCopyright", "Copyright © 2003 Alexander Djourik & copyright © 2005-2023 Yamagta Fumihiro. All rights reserved. WACUP related modifications by Darren Owen aka DrO (2021-2023)"
             VALUE "OriginalFilename", "in_tta.dll"
             VALUE "ProductName", "True Audio (TTA) Decoder"
             VALUE "ProductVersion", "3.64.6.0"
