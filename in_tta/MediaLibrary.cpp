@@ -232,7 +232,7 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 	if (FindTag) {
 		if (_stricmp(Metadata, "length") == 0)
 		{
-			_ultow_s(TagDataW.Length, dest, destlen, 10);
+			I2WStr(TagDataW.Length, dest, destlen);
 			RetCode = 1;
 		}
 		else if (_stricmp(Metadata, "formatinformation") == 0)
@@ -342,7 +342,6 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 
 int CMediaLibrary::SetExtendedFileInfo(const wchar_t *fn, const char *Metadata, const wchar_t *val)
 {
-
 	bool FindTag = false;
 	int RetCode = 0;
 
