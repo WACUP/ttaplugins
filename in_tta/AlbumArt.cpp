@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <taglib/mpeg/id3v2/id3v2tag.h>
 #include <taglib/mpeg/id3v2/frames/attachedpictureframe.h>
 #include <taglib/tag.h>
+#include <loader/loader/paths.h>
 #include <loader/loader/utils.h>
 
 #include "MediaLibrary.h"
@@ -113,79 +114,10 @@ TTA_AlbumArtProvider::~TTA_AlbumArtProvider()
 	extension = TagLib::String();
 }
 
-static const wchar_t *GetLastCharactercW(const wchar_t *string)
-{
-	if (!string || !*string)
-	{
-		return string;
-	}
-
-	return CharPrevW(string, string + wcslen(string));
-}
-
-static const wchar_t *scanstr_backW(const wchar_t *str, const wchar_t *toscan, const wchar_t *defval)
-{
-	const wchar_t *s = GetLastCharactercW(str);
-
-	if (!str[0])
-	{
-		return defval;
-	}
-
-	if (!toscan || !toscan[0])
-	{
-		return defval;
-	}
-
-	while (1)
-	{
-		const wchar_t *t = toscan;
-
-		while (*t)
-		{
-			if (*t == *s)
-			{
-				return s;
-			}
-
-			t = CharNextW(t);
-		}
-
-		t = CharPrevW(str, s);
-
-		if (t == s)
-		{
-			return defval;
-		}
-
-		s = t;
-	}
-}
-
-static const wchar_t *extensionW(const wchar_t *fn)
-{
-	const wchar_t *end = scanstr_backW(fn, L"./\\", 0);
-	if (!end)
-	{
-		return (fn + wcslen(fn));
-	}
-
-	if (*end == L'.')
-	{
-		return end + 1;
-	}
-
-	return (fn + wcslen(fn));
-}
-
 bool TTA_AlbumArtProvider::IsMine(const wchar_t *filename)
 {
-	const wchar_t *extension = extensionW(filename);
-	if (extension && *extension)
-	{
-		return (SameStr(extension, L"TTA")) ? true : false;
-	}
-	return false;
+	const wchar_t* extension = FindPathExtension(filename);
+	return (extension && SameStr(extension, L"TTA"));
 }
 
 int TTA_AlbumArtProvider::ProviderType(void)
