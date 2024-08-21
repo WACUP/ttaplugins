@@ -125,8 +125,8 @@ int CDecodeFile::SetFileName(const wchar_t *filename)
 	try {
 		TTA = new tta::tta_decoder((TTA_io_callback *)&iocb_wrapper);
 		if (NULL != TTA) {
-		TTA->init_get_info(&tta_info, 0);
-	}
+			TTA->init_get_info(&tta_info, 0);
+		}
 	}
 	catch (tta::tta_exception &ex) {
 		if (NULL != TTA) {
@@ -197,7 +197,6 @@ long double CDecodeFile::SeekPosition(int *done)
 
 int  CDecodeFile::GetSamples(BYTE *buffer, TTAuint32 buffersize)
 {
-	int skip_len = 0;
 	int len = 0;
 
 
@@ -224,8 +223,7 @@ int  CDecodeFile::GetSamples(BYTE *buffer, TTAuint32 buffersize)
 	}
 
 	if (len != 0) {
-		skip_len += len;
-		decode_pos_ms += (__int32)(skip_len * 1000. / tta_info.sps);
+		decode_pos_ms += (__int32)(len * 1000. / tta_info.sps);
 	}
 
 	::LeaveCriticalSection(&CriticalSection);

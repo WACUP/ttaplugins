@@ -29,7 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <taglib/trueaudio/trueaudiofile.h>
 #include <taglib/mpeg/id3v2/id3v2tag.h>
 #include <taglib/mpeg/id3v2/frames/attachedpictureframe.h>
-#include <taglib/tag.h>
 #include <loader/loader/paths.h>
 #include <loader/loader/utils.h>
 
@@ -92,26 +91,16 @@ protected:
 	CRITICAL_SECTION	CriticalSection;
 	std::wstring			FileName;
 	bool					isSucceed;
-	TagLib::ByteVector		AlbumArt;
-	TagLib::String			extension;
 };
 
-TTA_AlbumArtProvider::TTA_AlbumArtProvider() : svc_albumArtProvider()
+TTA_AlbumArtProvider::TTA_AlbumArtProvider() : svc_albumArtProvider(), isSucceed(false)
 {
 	::InitializeCriticalSection(&CriticalSection);
-	isSucceed = false;
-	FileName = L"";
-	AlbumArt = TagLib::ByteVector();
-	extension = TagLib::String();
 }
 
 TTA_AlbumArtProvider::~TTA_AlbumArtProvider()
 {
 	::DeleteCriticalSection(&CriticalSection);
-	isSucceed = false;
-	FileName = L"";
-	AlbumArt = TagLib::ByteVector();
-	extension = TagLib::String();
 }
 
 bool TTA_AlbumArtProvider::IsMine(const wchar_t *filename)
@@ -127,10 +116,7 @@ int TTA_AlbumArtProvider::ProviderType(void)
 
 int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t *type, void **bits, size_t *len, wchar_t **mime_type)
 {
-	size_t tag_size = 0;
 	int retval = ALBUMARTPROVIDER_FAILURE;
-	//size_t string_len = 0;
-	TagLib::String mimeType;
 
 	::EnterCriticalSection(&CriticalSection);
 
@@ -145,6 +131,9 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 		::LeaveCriticalSection(&CriticalSection);
 		return retval;
 	}
+
+	TagLib::String mimeType, extension;
+	TagLib::ByteVector AlbumArt;
 
 	if (!isSucceed || !SameStr(FileName.c_str(), filename))
 	{
@@ -163,10 +152,19 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 			isSucceed = true;
 		}
 
-		// read Album Art
-		AlbumArt =
-			TagFile.ID3v2Tag()->albumArt(TagLib::ID3v2::AttachedPictureFrame::FrontCover, mimeType);
-		extension = mimeType.substr(mimeType.find("/") + 1);
+		// dro changes to do more checking to avoid this
+		// causing an error if the file doesn't have any
+		// ID3v2 tags within it per recent crash reports
+		if (TagFile.hasID3v2Tag())
+		{
+			TagLib::ID3v2::Tag* id3v2 = TagFile.ID3v2Tag();
+			if (id3v2 != NULL)
+			{
+				// read Album Art
+				AlbumArt = id3v2->albumArt(TagLib::ID3v2::AttachedPictureFrame::FrontCover, mimeType);
+				extension = mimeType.substr(mimeType.find("/") + 1);
+			}
+		}
 	}
 
 	if (!AlbumArt.isEmpty())
@@ -198,8 +196,7 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 		}
 		else
 		{
-			ConvertANSI(extension.toCString(), CP_ACP, *mime_type, extension.size() + 1);/*/
-			mbstowcs_s(&string_len, *mime_type, extension.size() + 1, extension.toCString(), _TRUNCATE);/**/
+			ConvertANSI(extension.toCString(), extension.length(), CP_ACP, *mime_type, extension.size() + 1);
 			retval = ALBUMARTPROVIDER_SUCCESS;
 		}
 
@@ -227,7 +224,6 @@ int TTA_AlbumArtProvider::SetAlbumArtData(const wchar_t *filename, const wchar_t
 	TagLib::String mimeType(L"");
 	int size = 0;
 	TagLib::ID3v2::AttachedPictureFrame::Type artType = TagLib::ID3v2::AttachedPictureFrame::Other;
-	size_t string_len = 0;
 
 	::EnterCriticalSection(&CriticalSection);
 

@@ -40,7 +40,6 @@
 #include <Agave/Language/api_language.h>
 #include <Agave/Config/api_config.h>
 
-#include <taglib/tag.h>
 #include <taglib/trueaudio/trueaudiofile.h>
 #include <taglib/toolkit/tstring.h>
 
@@ -49,8 +48,6 @@
 #include "resource.h"
 
 #include <loader/loader/utils.h>
-
-#include <../wacup_version.h>
 
 const static int MAX_MESSAGE_LENGTH = 1024;
 const static __int32 PLAYING_BUFFER_LENGTH = 576;
@@ -71,8 +68,8 @@ void about(HWND hwndParent);
 int init(void);
 void quit(void);
 void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms);
-int  infodlg(const wchar_t *file, HWND hwndParent);
-//int  isourfile(const wchar_t *fn);
+/*int  infodlg(const wchar_t *file, HWND hwndParent);
+int  isourfile(const wchar_t *fn);*/
 int  play(const wchar_t *fn);
 void pause(void);
 void unpause(void);
@@ -98,7 +95,7 @@ In_Module plugin = {
 	init,
 	quit,
 	getfileinfo,
-	infodlg,
+	0/*infodlg*/,
 	0/*isourfile*/,
 	play,
 	pause,
@@ -110,9 +107,9 @@ In_Module plugin = {
 	setoutputtime,
 	setvolume,
 	setpan,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, // vis stuff
+	IN_INIT_VIS_RELATED_CALLS,
 	NULL, NULL,	// dsp
-	NULL,
+	IN_INIT_WACUP_EQSET_EMPTY
 	NULL,		// setinfo
 	NULL,		// out_mod
 	NULL,       // api_service
@@ -127,9 +124,10 @@ void GetFileExtensions(void)
 	static bool loaded_extensions;
 	if (!loaded_extensions)
 	{
+		loaded_extensions = true;
+
 		// TODO localise
 		plugin.FileExtensions = (char*)L"TTA\0TTA Audio File (*.TTA)\0";
-		loaded_extensions = true;
 	}
 }
 
@@ -182,12 +180,12 @@ void about(HWND hwndParent)
 {
 	wchar_t message[2048] = { 0 }, title[256] = { L"True Audio Decoder" };
 	StringCchPrintf(message, ARRAYSIZE(message), L"%s\nCopyright © 2003 Alexander "
-					L"Djourik\nCopyright © 2005-2023 Yamagta Fumihiro. All rights "
-					L"reserved.\n\nWACUP modifications by Darren Owen aka DrO (%s)"
-					L"\n\nBuild date: %s\n\nUsing libtta c++ v2.3 & based on the "
-					L"source code from https://github.com/bunbun042000/ttaplugins-winamp\n\n"
+					L"Djourik\nCopyright © 2005-2024 Yamagta Fumihiro. All rights "
+					L"reserved.\n\nWACUP modifications by %s (2021-%s)\n\nBuild "
+					L"date: %s\n\nUsing libtta c++ v2.3 & based on the source code "
+					L"from https://github.com/bunbun042000/ttaplugins-winamp\n\n"
 					L"Originally by Alexander Djourik, Pavel Zhilin & Anton Gorbunov.",
-					(LPCWSTR)plugin.description, L"2021-" WACUP_COPYRIGHT, TEXT(__DATE__));
+					(LPCWSTR)plugin.description, WACUP_Author(), WACUP_Copyright(), TEXT(__DATE__));
 	AboutMessageBox(hwndParent, message, title);
 }
 
@@ -236,12 +234,12 @@ void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms)
 	}
 }
 
-int infodlg(const wchar_t *filename, HWND parent)
+/*int infodlg(const wchar_t *filename, HWND parent)
 {
-	return 0;
+	return INFOBOX_UNCHANGED;
 }
 
-/*int isourfile(const wchar_t *filename)
+int isourfile(const wchar_t *filename)
 {
 	return 0;
 }*/
@@ -249,7 +247,6 @@ int infodlg(const wchar_t *filename, HWND parent)
 int play(const wchar_t *filename)
 {
 	int maxlatency;
-	unsigned long decoder_thread_id = 0;
 	//int return_number;
 
 	if (!playing_ttafile.isValid())
@@ -267,9 +264,9 @@ int play(const wchar_t *filename)
 		return -1;
 	}
 
-	maxlatency = plugin.outMod->Open(playing_ttafile.GetSampleRate(),
-									 playing_ttafile.GetNumberofChannel(),
-									 playing_ttafile.GetOutputBPS(), -1, -1);
+	maxlatency = (plugin.outMod->Open ? plugin.outMod->Open(playing_ttafile.GetSampleRate(),
+													   playing_ttafile.GetNumberofChannel(),
+													   playing_ttafile.GetOutputBPS(), -1, -1) : -1);
 	if (maxlatency < 0)
 	{
 		stop();
@@ -288,18 +285,14 @@ int play(const wchar_t *filename)
 
 	killDecoderThread = 0;
 
-	decoder_handle = CreateThread(NULL, 0, DecoderThread, NULL, CREATE_SUSPENDED, &decoder_thread_id);
+	decoder_handle = StartThread(DecoderThread, 0, static_cast<int>(plugin.
+								 config->GetInt(playbackConfigGroupGUID,
+								 L"priority", THREAD_PRIORITY_HIGHEST)), 0, NULL);
+
 	if (!decoder_handle)
 	{
 		stop();
 		return 1;
-	}
-	else
-	{
-		SetThreadPriority(decoder_handle, (int)plugin.config->GetInt(
-						  playbackConfigGroupGUID, L"priority",
-						  THREAD_PRIORITY_HIGHEST));
-		ResumeThread(decoder_handle);
 	}
 
 	return 0;
@@ -331,8 +324,8 @@ int ispaused(void)
 	{
 		return playing_ttafile.GetPaused();
 	}
-		return 0;
-	}
+	return 0;
+}
 
 void stop(void)
 {
@@ -344,7 +337,10 @@ void stop(void)
 		decoder_handle = INVALID_HANDLE_VALUE;
 	}
 
-	plugin.outMod->Close();
+	if (plugin.outMod && plugin.outMod->Close)
+	{
+		plugin.outMod->Close();
+	}
 	plugin.SAVSADeInit();
 }
 
@@ -354,19 +350,18 @@ int getlength(void)
 	{
 		return playing_ttafile.GetLengthbymsec();
 	}
-		return 0;
-	}
+	return 0;
+}
 
 int getoutputtime(void)
 {
 	if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
 	{
-		return (int)(playing_ttafile.GetDecodePosMs() +
-					(plugin.outMod->GetOutputTime() -
-					 plugin.outMod->GetWrittenTime()));
+		return (plugin.outMod ? (int)(playing_ttafile.GetDecodePosMs() +
+			   (plugin.outMod->GetOutputTime() - plugin.outMod->GetWrittenTime())) : 0);
 	}
-		return 0;
-	}
+	return 0;
+}
 
 void setoutputtime(int time_in_ms)
 {
@@ -392,7 +387,7 @@ static void do_vis(unsigned char *data, int count, int bps, long double position
 	if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
 	{
 		plugin.SAAddPCMData(data, playing_ttafile.GetNumberofChannel(), bps, (int)position);
-		plugin.VSAAddPCMData(data, playing_ttafile.GetNumberofChannel(), bps, (int)position);
+		/*plugin.VSAAddPCMData(data, playing_ttafile.GetNumberofChannel(), bps, (int)position);*/
 	}
 }
 
@@ -426,7 +421,10 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 		if (done)
 		{
 			PostEOF();
-			plugin.outMod->Close();
+			if (plugin.outMod && plugin.outMod->Close)
+			{
+				plugin.outMod->Close();
+			}
 			plugin.SAVSADeInit();
 			break;
 		}
@@ -442,7 +440,10 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 			{
 				tta_error_message(ex.code(), playing_ttafile.GetFileName());
 				PostEOF();
-				plugin.outMod->Close();
+				if (plugin.outMod && plugin.outMod->Close)
+				{
+					plugin.outMod->Close();
+				}
 				plugin.SAVSADeInit();
 				break;
 			}
@@ -485,7 +486,10 @@ extern "C"
 	{
 		if (m_ReadTag == NULL)
 		{
-			m_ReadTag = new CMediaLibrary();
+			if (!SameStrA(data, "reset"))
+			{
+				m_ReadTag = new CMediaLibrary();
+			}
 		}
 		return ((m_ReadTag != NULL) ? m_ReadTag->GetExtendedFileInfo(fn, data, dest, destlen) : 0);
 	}
@@ -570,19 +574,19 @@ extern "C"
 
 		if (bps)
 		{
-		*bps = dec->GetBitsperSample();
+			*bps = dec->GetBitsperSample();
 		}
 		if (nch)
 		{
-		*nch = dec->GetNumberofChannel();
+			*nch = dec->GetNumberofChannel();
 		}
 		if (srate)
 		{
-		*srate = dec->GetSampleRate();
+			*srate = dec->GetSampleRate();
 		}
 		if (size && bps && nch)
 		{
-		*size = dec->GetDataLength() * (*bps / 8) * (*nch);
+			*size = dec->GetDataLength() * (*bps / 8) * (*nch);
 		}
 
 		return reinterpret_cast<intptr_t>(dec);

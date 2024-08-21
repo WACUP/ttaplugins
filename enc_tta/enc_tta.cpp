@@ -49,10 +49,10 @@ typedef struct
 }
 configwndrec;
 
-BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+/*BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
 	return TRUE;
-}
+}*/
 
 //void readconfig(char *configfile, configtype *cfg)
 //{
@@ -101,12 +101,16 @@ void GetLocalisationApiService(void)
 
 extern "C"
 {
-	unsigned int __declspec(dllexport) GetAudioTypes3(int idx, char *desc)
+	unsigned int __declspec(dllexport) GetAudioTypes3(const int idx, GetAudioTypeDesc *desc)
 	{
 		if (idx == 0)
 		{
 			GetLocalisationApiService();
+#ifndef _WIN64
 			ConfigBuildName(desc, WASABI_API_LNGSTRING(IDS_ENC_TTA_DESC), VERSION_CHAR, "");
+#else
+			ConfigBuildName(desc, WASABI_API_LNGSTRINGW(IDS_ENC_TTA_DESC), TEXT(VERSION_CHAR), "");
+#endif
 			return mmioFOURCC('T', 'T', 'A', ' ');
 		}
 		return 0;
@@ -118,7 +122,7 @@ extern "C"
 		{
 			//			configtype cfg;
 			//			readconfig(configfile, &cfg);
-			*outt = mmioFOURCC('T', 'T', 'A', ' ');
+
 			AudioCoderTTA *t = 0;
 			t = new AudioCoderTTA(nch, srate, bps);
 			if (t->GetLastError())
@@ -153,15 +157,19 @@ extern "C"
 		((AudioCoderTTA*)coder)->PrepareToFinish();
 	}
 
-	BOOL CALLBACK DlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	/*BOOL CALLBACK DlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		static configwndrec *wr;
 		switch (uMsg)
 		{
 		case WM_INITDIALOG:
-			wr = (configwndrec *)lParam;
-			//			SendDlgItemMessage(hwndDlg, IDC_COMPRESSIONSLIDER, TBM_SETRANGE, TRUE, MAKELONG(0, 12));
-			//			SendDlgItemMessage(hwndDlg, IDC_COMPRESSIONSLIDER, TBM_SETPOS, TRUE, wr->cfg.compression);
+			configwndrec* wc = (configwndrec*)lParam;
+			if (wc)
+			{
+				//			SendDlgItemMessage(hwndDlg, IDC_COMPRESSIONSLIDER, TBM_SETRANGE, TRUE, MAKELONG(0, 12));
+				//			SendDlgItemMessage(hwndDlg, IDC_COMPRESSIONSLIDER, TBM_SETPOS, TRUE, wc->cfg.compression);
+
+				SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG)lParam);
+			}
 			break;
 
 		case WM_NOTIFY:
@@ -174,23 +182,28 @@ extern "C"
 			break;
 
 		case WM_DESTROY:
-			//			writeconfig(wr->configfile, &wr->cfg);
-			free(wr); wr = NULL;
+			configwndrec* wc = (configwndrec*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA, 0);
+			if (wc)
+			{
+				//			writeconfig(wc->configfile, &wc->cfg);
+				free(wc);
+				wc = NULL;
+			}
 			break;
 		}
 		return 0;
-	}
+	}*/
 
 	HWND __declspec(dllexport) ConfigAudio3(HWND hwndParent, HINSTANCE hinst, unsigned int outt, char *configfile)
 	{
 		if (outt == mmioFOURCC('T', 'T', 'A', ' '))
 		{
-			configwndrec *wr = (configwndrec*)malloc(sizeof(configwndrec));
-			//			if (configfile) lstrcpyn(wr->configfile, configfile, MAX_PATH);
-			//			else wr->configfile[0] = 0;
-			//			readconfig(configfile, &wr->cfg);
-			GetLocalisationApiService();
-			//			return WASABI_API_CREATEDIALOGPARAM(IDD_CONFIG, hwndParent, DlgProc, (LPARAM)wr);
+			//configwndrec *wc = (configwndrec*)malloc(sizeof(configwndrec));
+			//			if (configfile) lstrcpyn(wc->configfile, configfile, MAX_PATH);
+			//			else wc->configfile[0] = 0;
+			//			readconfig(configfile, &wc->cfg);
+			//GetLocalisationApiService();
+			//			return WASABI_API_CREATEDIALOGPARAM(IDD_CONFIG, hwndParent, DlgProc, (LPARAM)wc);
 		}
 		return NULL;
 	}
@@ -205,10 +218,7 @@ extern "C"
 	{
 		if (outt == mmioFOURCC('T', 'T', 'A', ' '))
 		{
-			//			configtype cfg;
-			//			readconfig(configfile, &cfg);
-			//			if (!lstrcmpi(item, "bitrate"))  lstrcpynA(data, "755", len); // FUCKO: this is ment to be an estimate for approximations of output filesize (used by ml_pmp). Improve this.
-			//			else if (!lstrcmpi(item, "extension")) lstrcpynA(data, "flac", len);
+			ConfigItemCopy(item, "extension", data, len, "tta");
 			return 1;
 		}
 		return 0;
