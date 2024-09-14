@@ -264,9 +264,10 @@ int play(const wchar_t *filename)
 		return -1;
 	}
 
-	maxlatency = (plugin.outMod->Open ? plugin.outMod->Open(playing_ttafile.GetSampleRate(),
-													   playing_ttafile.GetNumberofChannel(),
-													   playing_ttafile.GetOutputBPS(), -1, -1) : -1);
+	const int samplerate = playing_ttafile.GetSampleRate(),
+			  channels = playing_ttafile.GetNumberofChannel();
+	maxlatency = (plugin.outMod->Open && samplerate && channels ? plugin.outMod->Open(samplerate,
+										 channels, playing_ttafile.GetOutputBPS(), -1, -1) : -1);
 	if (maxlatency < 0)
 	{
 		stop();
@@ -274,11 +275,11 @@ int play(const wchar_t *filename)
 	}
 
 	// setup information display
-	plugin.SetInfo(playing_ttafile.GetBitrate(), playing_ttafile.GetSampleRate() / 1000, playing_ttafile.GetNumberofChannel(), 1);
+	plugin.SetInfo(playing_ttafile.GetBitrate(), (samplerate / 1000), channels, 1);
 
 	// initialize vis stuff
-	plugin.SAVSAInit(maxlatency, playing_ttafile.GetSampleRate());
-	plugin.VSASetInfo(playing_ttafile.GetNumberofChannel(), playing_ttafile.GetSampleRate());
+	plugin.SAVSAInit(maxlatency, samplerate);
+	plugin.VSASetInfo(channels, samplerate);
 
 	// set the output plug-ins default volume
 	plugin.outMod->SetVolume(-666);
@@ -305,7 +306,10 @@ void pause(void)
 		playing_ttafile.SetPaused(1);
 	}
 
-	plugin.outMod->Pause(1);
+	if (plugin.outMod)
+	{
+		plugin.outMod->Pause(1);
+	}
 }
 
 void unpause(void)
@@ -315,7 +319,10 @@ void unpause(void)
 		playing_ttafile.SetPaused(0);
 	}
 
-	plugin.outMod->Pause(0);
+	if (plugin.outMod)
+	{
+		plugin.outMod->Pause(0);
+	}
 }
 
 int ispaused(void)
@@ -339,9 +346,22 @@ void stop(void)
 
 	if (plugin.outMod && plugin.outMod->Close)
 	{
-		plugin.outMod->Close();
+		// there's a user out there using out_sqr
+		// & it'll crash when tta files are being
+		// played which has been going on forever
+		__try
+		{
+			plugin.outMod->Close();
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+		}
 	}
-	plugin.SAVSADeInit();
+
+	if (plugin.outMod)
+	{
+		plugin.SAVSADeInit();
+	}
 }
 
 int getlength(void)
@@ -373,21 +393,17 @@ void setoutputtime(int time_in_ms)
 
 void setvolume(int volume)
 {
-	plugin.outMod->SetVolume(volume);
+	if (plugin.outMod)
+	{
+		plugin.outMod->SetVolume(volume);
+	}
 }
 
 void setpan(int pan)
 {
-	plugin.outMod->SetPan(pan);
-}
-
-static void do_vis(unsigned char *data, int count, int bps, long double position)
-{
-
-	if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
+	if (plugin.outMod)
 	{
-		plugin.SAAddPCMData(data, playing_ttafile.GetNumberofChannel(), bps, (int)position);
-		/*plugin.VSAAddPCMData(data, playing_ttafile.GetNumberofChannel(), bps, (int)position);*/
+		plugin.outMod->SetPan(pan);
 	}
 }
 
@@ -404,6 +420,7 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 		return 0;
 	}
 
+	const int channels = playing_ttafile.GetNumberofChannel();
 	while (!killDecoderThread)
 	{
 		if (!playing_ttafile.isDecodable())
@@ -429,7 +446,7 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 			break;
 		}
 		else if (plugin.outMod->CanWrite() >=
-			((PLAYING_BUFFER_LENGTH * playing_ttafile.GetNumberofChannel() *
+			((PLAYING_BUFFER_LENGTH * channels *
 				playing_ttafile.GetByteSize()) << (plugin.dsp_isactive() ? 1 : 0)))
 		{
 			try
@@ -454,15 +471,20 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 			}
 			else
 			{
-				do_vis(pcm_buffer, decoded_samples, playing_ttafile.GetOutputBPS(), playing_ttafile.GetDecodePosMs());
-				if (plugin.dsp_isactive())
+				const int bps = playing_ttafile.GetOutputBPS();
+				if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
 				{
-					decoded_samples = plugin.dsp_dosamples(reinterpret_cast<short*>(pcm_buffer), decoded_samples, playing_ttafile.GetOutputBPS(),
-						playing_ttafile.GetNumberofChannel(), playing_ttafile.GetSampleRate());
+					plugin.SAAddPCMData(pcm_buffer, channels, bps, (int)playing_ttafile.GetDecodePosMs());
+					/*plugin.VSAAddPCMData(pcm_buffer, channels, bps, (int)playing_ttafile.GetDecodePosMs());*/
 				}
 
-				plugin.outMod->Write(reinterpret_cast<char *>(pcm_buffer), decoded_samples * playing_ttafile.GetNumberofChannel()
-					* (playing_ttafile.GetOutputBPS() >> 3));
+				if (plugin.dsp_isactive())
+				{
+					decoded_samples = plugin.dsp_dosamples(reinterpret_cast<short*>(pcm_buffer), decoded_samples, bps,
+						channels, playing_ttafile.GetSampleRate());
+				}
+
+				plugin.outMod->Write(reinterpret_cast<char *>(pcm_buffer), decoded_samples * channels * (bps >> 3));
 			}
 		}
 		else
