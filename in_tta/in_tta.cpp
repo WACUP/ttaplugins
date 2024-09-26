@@ -48,6 +48,7 @@
 #include "resource.h"
 
 #include <loader/loader/utils.h>
+#include <loader/loader/delay_load_helper.h>
 
 const static int MAX_MESSAGE_LENGTH = 1024;
 const static __int32 PLAYING_BUFFER_LENGTH = 576;
@@ -676,3 +677,5 @@ extern "C"
 		return IN_PLUGIN_UNINSTALL_NOW;
 	}
 }
+
+DLL_DELAY_LOAD_HANDLER
