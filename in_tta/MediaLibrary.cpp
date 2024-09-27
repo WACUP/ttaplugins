@@ -223,7 +223,14 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 	}
 	else if (_stricmp(Metadata, "reset") == 0)
 	{
-		::EnterCriticalSection(&CriticalSection);
+		// this might sometimes mess up so we'll see if what's
+		// being requested is a reset & if it is then we'll do
+		// a check to see if something else has the lock to do
+		// a quick bail to try to avoid a hang related failure
+		if (!::TryEnterCriticalSection(&CriticalSection))
+		{
+			return 0;
+		}
 
 		FileName = L"";
 		FlushCache(true);
