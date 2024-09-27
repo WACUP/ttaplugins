@@ -49,6 +49,7 @@
 
 #include <loader/loader/utils.h>
 #include <loader/loader/delay_load_helper.h>
+#include <loader/loader/runtime_helper.h>
 
 const static int MAX_MESSAGE_LENGTH = 1024;
 const static __int32 PLAYING_BUFFER_LENGTH = 576;
@@ -679,3 +680,5 @@ extern "C"
 }
 
 DLL_DELAY_LOAD_HANDLER
+
+RUNTIME_HELPER_HANDLER

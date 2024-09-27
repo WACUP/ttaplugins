@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <Wasabi/bfc/platform/platform.h>
 #define WA_UTILS_SIMPLE
 #include <../loader/loader/utils.h>
+#include <../loader/loader/runtime_helper.h>
 #include <../loader/hook/get_api_service.h>
 
 #include <strsafe.h>
@@ -272,4 +273,4 @@ static void tta_error_message(int error, const wchar_t *filename)
 						  MB_ICONERROR | MB_SYSTEMMODAL);
 }
 
-}
+RUNTIME_LEN_HELPER_HANDLER
