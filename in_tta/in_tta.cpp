@@ -338,6 +338,8 @@ int ispaused(void)
 
 void stop(void)
 {
+	CheckThreadHandleIsValid(&decoder_handle);
+
 	if (INVALID_HANDLE_VALUE != decoder_handle)
 	{
 		killDecoderThread = 1;
