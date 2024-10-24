@@ -45,7 +45,8 @@ struct TagInfo
 	std::wstring	Publisher;
 	std::wstring	Disc;
 	std::wstring	BPM;
-	std::wstring    bitrate;
+	std::wstring    Bitrate;
+	std::wstring    Samplerate;
 };
 
 class CMediaLibrary

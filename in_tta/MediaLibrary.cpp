@@ -135,7 +135,8 @@ bool CMediaLibrary::GetTagInfo(const std::wstring fn)
 			<< L")\nLength\t\t: " << second.str();
 		TagDataW.Format = ttainfo_temp.str();
 
-		TagDataW.bitrate = std::to_wstring((long long)TTAFile.audioProperties()->bitrate());
+		TagDataW.Bitrate = std::to_wstring((long long)TTAFile.audioProperties()->bitrate());
+		TagDataW.Samplerate = std::to_wstring((long long)TTAFile.audioProperties()->sampleRate());
 
 		std::wstring temp;
 		if (NULL != TTAFile.ID3v2Tag())
@@ -331,7 +332,11 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 		}
 		else if (_stricmp(Metadata, "bitrate") == 0)
 		{
-			wcsncpy_s(dest, destlen, TagDataW.bitrate.c_str(), _TRUNCATE);
+			wcsncpy_s(dest, destlen, TagDataW.Bitrate.c_str(), _TRUNCATE);
+		}
+		else if (_stricmp(Metadata, "samplerate") == 0)
+		{
+			wcsncpy_s(dest, destlen, TagDataW.Samplerate.c_str(), _TRUNCATE);
 		}
 		else
 		{
