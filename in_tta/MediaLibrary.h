@@ -31,6 +31,8 @@ static const __int32 MAX_YEAR = 10;
 
 struct TagInfo
 {
+	TagInfo() : Length(0) {}
+
 	unsigned long	Length;
 	std::wstring	Format;
 	std::wstring	Title;
@@ -47,6 +49,7 @@ struct TagInfo
 	std::wstring	BPM;
 	std::wstring    Bitrate;
 	std::wstring    Samplerate;
+	std::wstring    BitDepth;
 };
 
 class CMediaLibrary

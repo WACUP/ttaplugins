@@ -71,6 +71,7 @@ void CMediaLibrary::FlushCache(const bool skipLock)
 	TagDataW.Publisher = L"";
 	TagDataW.Disc = L"";
 	TagDataW.BPM = L"";
+	TagDataW.BitDepth = L"";
 
 	FileName = L"";
 
@@ -123,20 +124,21 @@ bool CMediaLibrary::GetTagInfo(const std::wstring fn)
 			second << std::setw(2) << std::setfill(L'0') << sec;
 		}
 
+		TagDataW.Bitrate = std::to_wstring((long long)TTAFile.audioProperties()->bitrate());
+		TagDataW.Samplerate = std::to_wstring((long long)TTAFile.audioProperties()->sampleRate());
+		TagDataW.BitDepth = std::to_wstring((long long)TTAFile.audioProperties()->bitsPerSample());
+
 		std::wstring channel_designation = (TTAFile.audioProperties()->channels() == 2) ? L"Stereo" : L"Monoral";
 
 		std::wstringstream ttainfo_temp;
 		ttainfo_temp << L"Format\t\t: TTA" << TTAFile.audioProperties()->ttaVersion()
-			<< L"\nSample\t\t: " << (int)TTAFile.audioProperties()->bitsPerSample()
-			<< L"bit\nSample Rate\t: " << TTAFile.audioProperties()->sampleRate()
-			<< L"Hz\nBit Rate\t\t: " << TTAFile.audioProperties()->bitrate()
-			<< L"kbit/s\nNum. of Chan.\t: " << TTAFile.audioProperties()->channels()
-			<< L"(" << channel_designation
+			<< L"\nSample\t\t: " << TagDataW.BitDepth
+			<< L"-bit\nSample Rate\t: " << TagDataW.Samplerate
+			<< L" Hz\nBit Rate\t\t: " << TagDataW.Bitrate
+			<< L" kbit/s\n# of Channels\t: " << TTAFile.audioProperties()->channels()
+			<< L" (" << channel_designation
 			<< L")\nLength\t\t: " << second.str();
 		TagDataW.Format = ttainfo_temp.str();
-
-		TagDataW.Bitrate = std::to_wstring((long long)TTAFile.audioProperties()->bitrate());
-		TagDataW.Samplerate = std::to_wstring((long long)TTAFile.audioProperties()->sampleRate());
 
 		std::wstring temp;
 		if (NULL != TTAFile.ID3v2Tag())
@@ -337,6 +339,10 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 		else if (_stricmp(Metadata, "samplerate") == 0)
 		{
 			wcsncpy_s(dest, destlen, TagDataW.Samplerate.c_str(), _TRUNCATE);
+		}
+		else if (_stricmp(Metadata, "bitdepth") == 0)
+		{
+			wcsncpy_s(dest, destlen, TagDataW.BitDepth.c_str(), _TRUNCATE);
 		}
 		else
 		{

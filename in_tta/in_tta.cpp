@@ -206,7 +206,7 @@ void quit(void)
 
 void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms)
 {
-	title = L"";
+	//title = L"";
 
 	if (!file || !*file)
 	{
