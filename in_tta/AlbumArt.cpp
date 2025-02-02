@@ -105,8 +105,7 @@ TTA_AlbumArtProvider::~TTA_AlbumArtProvider()
 
 bool TTA_AlbumArtProvider::IsMine(const wchar_t *filename)
 {
-	const wchar_t* extension = FindPathExtension(filename);
-	return (extension && SameStr(extension, L"TTA"));
+	return CheckExtensionIsMine(filename, L"TTA");
 }
 
 int TTA_AlbumArtProvider::ProviderType(void)

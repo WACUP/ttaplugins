@@ -248,9 +248,6 @@ int isourfile(const wchar_t *filename)
 
 int play(const wchar_t *filename)
 {
-	int maxlatency;
-	//int return_number;
-
 	if (!playing_ttafile.isValid())
 	{
 		return 1;
@@ -258,7 +255,7 @@ int play(const wchar_t *filename)
 
 	try
 	{
-		/*return_number = */playing_ttafile.SetFileName(filename);
+		playing_ttafile.SetFileName(filename);
 	}
 	catch (CDecodeFile_exception &ex)
 	{
@@ -267,9 +264,9 @@ int play(const wchar_t *filename)
 	}
 
 	const int samplerate = playing_ttafile.GetSampleRate(),
-			  channels = playing_ttafile.GetNumberofChannel();
-	maxlatency = (plugin.outMod->Open && samplerate && channels ? plugin.outMod->Open(samplerate,
-										 channels, playing_ttafile.GetOutputBPS(), -1, -1) : -1);
+			  channels = playing_ttafile.GetNumberofChannel(),
+			  maxlatency = (plugin.outMod->Open && samplerate && channels ? plugin.outMod->Open(samplerate,
+												   channels, playing_ttafile.GetOutputBPS(), -1, -1) : -1);
 	if (maxlatency < 0)
 	{
 		stop();
