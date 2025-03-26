@@ -265,8 +265,9 @@ int play(const wchar_t *filename)
 
 	const int samplerate = playing_ttafile.GetSampleRate(),
 			  channels = playing_ttafile.GetNumberofChannel(),
-			  maxlatency = (plugin.outMod->Open && samplerate && channels ? plugin.outMod->Open(samplerate,
-												   channels, playing_ttafile.GetOutputBPS(), -1, -1) : -1);
+			  maxlatency = (plugin.outMod && plugin.outMod->Open && samplerate &&
+							channels ? plugin.outMod->Open(samplerate, channels,
+							playing_ttafile.GetOutputBPS(), -1, -1) : -1);
 	if (maxlatency < 0)
 	{
 		stop();
@@ -335,14 +336,17 @@ int ispaused(void)
 
 void stop(void)
 {
-	CheckThreadHandleIsValid(&decoder_handle);
-
-	if (INVALID_HANDLE_VALUE != decoder_handle)
+	if (CheckThreadHandleIsValid(&decoder_handle))
 	{
 		killDecoderThread = 1;
 		WaitForSingleObject(decoder_handle, INFINITE);
-		CloseHandle(decoder_handle);
-		decoder_handle = INVALID_HANDLE_VALUE;
+
+		if ((decoder_handle != NULL) &&
+			(decoder_handle != INVALID_HANDLE_VALUE))
+		{
+			CloseHandle(decoder_handle);
+			decoder_handle = INVALID_HANDLE_VALUE;
+		}
 	}
 
 	if (plugin.outMod && plugin.outMod->Close)
