@@ -42,7 +42,7 @@ public:
 	FOURCC GetServiceType();
 	const char *GetServiceName();
 	GUID GetGUID();
-	void *GetInterface(int global_lock);
+	void *GetInterface(WA_SVC_GETIF_PARAM);
 	int ReleaseInterface(void *ifc);
 	int ServiceNotify(int msg, int param1, int param2);
 
@@ -62,16 +62,6 @@ void Wasabi_Init()
 void Wasabi_Quit()
 {
 	plugin.service->service_deregister(&albumArtFactory);
-}
-
-void *Wasabi_Malloc(size_t size_in_bytes)
-{
-	return plugin.memmgr->sysMalloc(size_in_bytes);
-}
-
-void Wasabi_Free(void *memory_block)
-{
-	plugin.memmgr->sysFree(memory_block);
 }
 
 class TTA_AlbumArtProvider : public svc_albumArtProvider
@@ -169,7 +159,7 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 	if (!AlbumArt.isEmpty())
 	{
 		*len = AlbumArt.size();
-		*bits = (char *)Wasabi_Malloc(*len);
+		*bits = (char *)SafeMalloc(*len);
 		if (NULL == *bits)
 		{
 			::LeaveCriticalSection(&CriticalSection);
@@ -183,12 +173,12 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 			return retval;
 		}
 
-		*mime_type = (wchar_t *)Wasabi_Malloc(extension.size() * 2 + 2);
+		*mime_type = (wchar_t *)SafeMalloc(extension.size() * 2 + 2);
 		if (NULL == *mime_type)
 		{
 			if (NULL != *bits)
 			{
-				Wasabi_Free(*bits);
+				SafeFree(*bits);
 			}
 			::LeaveCriticalSection(&CriticalSection);
 			return retval;
@@ -203,12 +193,12 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 		{
 			if (NULL != *bits)
 			{
-				Wasabi_Free(*bits);
+				SafeFree(*bits);
 			}
 
 			if (NULL != *mime_type)
 			{
-				Wasabi_Free(*mime_type);
+				SafeFree(*mime_type);
 			}
 		}
 	}
@@ -307,7 +297,7 @@ GUID AlbumArtFactory::GetGUID()
 	return TTA_albumArtproviderGUID;
 }
 
-void *AlbumArtFactory::GetInterface(int global_lock)
+void *AlbumArtFactory::GetInterface(WA_SVC_GETIF_PARAM)
 {
 	if (!albumArtProvider)
 	{

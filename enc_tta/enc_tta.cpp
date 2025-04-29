@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "..\common\VersionNo.h"
 
 // wasabi based services for localisation support
-#include <api/service/waServiceFactory.h>
 #include <Agave/Language/api_language.h>
 #include <Winamp/wa_ipc.h>
 #include <mmsystem.h>
@@ -32,12 +31,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define WA_UTILS_SIMPLE
 #include <../loader/loader/utils.h>
 #include <../loader/loader/runtime_helper.h>
-#include <../loader/hook/get_api_service.h>
 
 #include <strsafe.h>
 
 HWND winampwnd = 0;
-api_service *WASABI_API_SVC = 0;
 
 SETUP_API_LNG_VARS;
 
@@ -76,27 +73,11 @@ static HINSTANCE GetMyInstance()
 
 void GetLocalisationApiService(void)
 {
-	if (!WASABI_API_LNG)
+	if (WASABI_API_ORIG_HINST == NULL)
 	{
 		// loader so that we can get the localisation service api for use
-		if (WASABI_API_SVC == NULL)
-		{
-			WASABI_API_SVC = GetServiceAPIPtr();
-			if (WASABI_API_SVC == NULL)
-			{
-				return;
-			}
-		}
-
-		if (!WASABI_API_LNG)
-		{
-			waServiceFactory *sf;
-			sf = WASABI_API_SVC->service_getServiceByGuid(languageApiGUID);
-			if (sf) WASABI_API_LNG = reinterpret_cast<api_language*>(sf->getInterface());
-		}
-
 		// need to have this initialised before we try to do anything with localisation features
-		WASABI_API_START_LANG(GetMyInstance(), EncFlakeLangGUID);
+		StartPluginLangOnly(GetMyInstance(), EncFlakeLangGUID);
 	}
 }
 
@@ -107,10 +88,12 @@ extern "C"
 		if (idx == 0)
 		{
 			GetLocalisationApiService();
+
+			ConfigBuildName(WASABI_API_LNG_HINST, WASABI_API_ORIG_HINST,
 #ifndef _WIN64
-			ConfigBuildName(desc, WASABI_API_LNGSTRING(IDS_ENC_TTA_DESC), VERSION_CHAR, "");
+							desc, IDS_ENC_TTA_DESC, VERSION_CHAR, "");
 #else
-			ConfigBuildName(desc, WASABI_API_LNGSTRINGW(IDS_ENC_TTA_DESC), TEXT(VERSION_CHAR), "");
+							desc, IDS_ENC_TTA_DESC, TEXT(VERSION_CHAR), "");
 #endif
 			return mmioFOURCC('T', 'T', 'A', ' ');
 		}
@@ -204,7 +187,7 @@ extern "C"
 			//			else wc->configfile[0] = 0;
 			//			readconfig(configfile, &wc->cfg);
 			//GetLocalisationApiService();
-			//			return WASABI_API_CREATEDIALOGPARAM(IDD_CONFIG, hwndParent, DlgProc, (LPARAM)wc);
+			//			return LangCreateDialog(IDD_CONFIG, hwndParent, DlgProc, (LPARAM)wc);
 		}
 		return NULL;
 	}

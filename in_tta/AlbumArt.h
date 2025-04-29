@@ -22,7 +22,5 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 void Wasabi_Init();
 void Wasabi_Quit();
-void *Wasabi_Malloc(size_t size_in_bytes);
-void Wasabi_Free(void *memory_block);
 
 #endif

@@ -50,6 +50,7 @@
 #include <loader/loader/utils.h>
 #include <loader/loader/delay_load_helper.h>
 #include <loader/loader/runtime_helper.h>
+#include <loader/hook/squash.h>
 
 const static int MAX_MESSAGE_LENGTH = 1024;
 const static __int32 PLAYING_BUFFER_LENGTH = 576;
@@ -123,13 +124,10 @@ In_Module plugin = {
 
 void GetFileExtensions(void)
 {
-	static bool loaded_extensions;
-	if (!loaded_extensions)
+	if (!plugin.FileExtensions)
 	{
-		loaded_extensions = true;
-
 		// TODO localise
-		plugin.FileExtensions = (char*)L"TTA\0TTA Audio File (*.TTA)\0";
+		plugin.FileExtensions = BuildInputFileListString(L"TTA", L"TTA Audio File (*.TTA)");
 	}
 }
 
@@ -180,15 +178,14 @@ static void tta_error_message(int error, const wchar_t *filename)
 
 void about(HWND hwndParent)
 {
-	wchar_t message[2048] = { 0 }, title[256] = { L"True Audio Decoder" };
-	StringCchPrintf(message, ARRAYSIZE(message), L"%s\nCopyright © 2003 Alexander "
-					L"Djourik\nCopyright © 2005-2024 Yamagta Fumihiro. All rights "
-					L"reserved.\n\nWACUP modifications by %s (2021-%s)\n\nBuild "
-					L"date: %s\n\nUsing libtta c++ v2.3 & based on the source code "
-					L"from https://github.com/bunbun042000/ttaplugins-winamp\n\n"
-					L"Originally by Alexander Djourik, Pavel Zhilin & Anton Gorbunov.",
-					(LPCWSTR)plugin.description, WACUP_Author(), WACUP_Copyright(), TEXT(__DATE__));
-	AboutMessageBox(hwndParent, message, title);
+	const unsigned char* output = DecompressResourceText(plugin.hDllInstance, plugin.hDllInstance, IDR_ABOUT_TEXT_GZ);
+	// TODO localise
+	wchar_t message[2048]/* = { 0 }*/;
+	PrintfCch(message, ARRAYSIZE(message), (LPCWSTR)output,
+			  (LPCWSTR)plugin.description, WACUP_Author(),
+			  WACUP_Copyright(), TEXT(__DATE__));
+	AboutMessageBox(hwndParent, message, L"True Audio Decoder");
+	SafeFree((void*)output);
 }
 
 int init(void)
@@ -555,7 +552,7 @@ extern "C"
 					delete info;
 					return NULL;
 				}
-				return WASABI_API_CREATEDIALOGPARAMW(IDD_INFO, parent, ChildProc_Advanced, (LPARAM)info);
+				return LangCreateDialog(IDD_INFO, parent, ChildProc_Advanced, (LPARAM)info);
 			}
 		}*/
 		return NULL;
