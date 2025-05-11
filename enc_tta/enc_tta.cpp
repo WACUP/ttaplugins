@@ -63,31 +63,37 @@ configwndrec;
 //	if (configfile) WritePrivateProfileStruct("audio_flake", "conf", cfg, sizeof(configtype), configfile);
 //}
 
+#ifndef _WIN64
 static HINSTANCE GetMyInstance()
 {
-	MEMORY_BASIC_INFORMATION mbi = { 0 };
+	MEMORY_BASIC_INFORMATION mbi/* = { 0 }*/;
 	if (VirtualQuery(GetMyInstance, &mbi, sizeof(mbi)))
 		return (HINSTANCE)mbi.AllocationBase;
 	return NULL;
 }
+#endif
 
-void GetLocalisationApiService(void)
+void GetLocalisationApiService(HINSTANCE hinst)
 {
 	if (WASABI_API_ORIG_HINST == NULL)
 	{
 		// loader so that we can get the localisation service api for use
 		// need to have this initialised before we try to do anything with localisation features
-		StartPluginLangOnly(GetMyInstance(), EncFlakeLangGUID);
+		StartPluginLangOnly(hinst, EncFlakeLangGUID);
 	}
 }
 
 extern "C"
 {
-	unsigned int __declspec(dllexport) GetAudioTypes3(const int idx, GetAudioTypeDesc *desc)
+	unsigned int __declspec(dllexport) GetAudioTypes3(const int idx, GETAUDIOTYPEPARAMS)
 	{
 		if (idx == 0)
 		{
-			GetLocalisationApiService();
+#ifndef _WIN64
+			GetLocalisationApiService(GetMyInstance());
+#else
+			GetLocalisationApiService(hinst);
+#endif
 
 			ConfigBuildName(WASABI_API_LNG_HINST, WASABI_API_ORIG_HINST,
 #ifndef _WIN64
@@ -121,8 +127,8 @@ extern "C"
 
 	void __declspec(dllexport) FinishAudio3(const char *filename, AudioCoder *coder)
 	{
-		wchar_t wfilename[MAX_PATHLEN + 1] = { 0 };
-		MultiByteToWideChar(CP_ACP, 0, filename, -1, wfilename, MAX_PATHLEN);
+		wchar_t wfilename[MAX_PATHLEN + 1]/* = { 0 }*/;
+		ConvertANSI(filename, -1, CP_ACP, wfilename, ARRAYSIZE(wfilename), NULL);
 		((AudioCoderTTA*)coder)->FinishAudio(wfilename);
 	}
 
@@ -186,7 +192,7 @@ extern "C"
 			//			if (configfile) lstrcpyn(wc->configfile, configfile, MAX_PATH);
 			//			else wc->configfile[0] = 0;
 			//			readconfig(configfile, &wc->cfg);
-			//GetLocalisationApiService();
+			//GetLocalisationApiService(hinst);
 			//			return LangCreateDialog(IDD_CONFIG, hwndParent, DlgProc, (LPARAM)wc);
 		}
 		return NULL;

@@ -185,7 +185,8 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 		}
 		else
 		{
-			ConvertANSI(extension.toCString(), extension.length(), CP_ACP, *mime_type, extension.size() + 1);
+			ConvertANSI(extension.toCString(), extension.length(), CP_ACP,
+								  *mime_type, extension.size() + 1, NULL);
 			retval = ALBUMARTPROVIDER_SUCCESS;
 		}
 
