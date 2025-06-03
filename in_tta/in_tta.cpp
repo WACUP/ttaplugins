@@ -333,18 +333,8 @@ int ispaused(void)
 
 void stop(void)
 {
-	if (CheckThreadHandleIsValid(&decoder_handle))
-	{
-		killDecoderThread = 1;
-		WaitForSingleObject(decoder_handle, INFINITE);
-
-		if ((decoder_handle != NULL) &&
-			(decoder_handle != INVALID_HANDLE_VALUE))
-		{
-			CloseHandle(decoder_handle);
-			decoder_handle = INVALID_HANDLE_VALUE;
-		}
-	}
+	killDecoderThread = 1;
+	WaitForThreadToClose(&decoder_handle, INFINITE);
 
 	if (plugin.outMod && plugin.outMod->Close)
 	{
@@ -395,7 +385,7 @@ void setoutputtime(int time_in_ms)
 
 void setvolume(int volume)
 {
-	if (plugin.outMod)
+	if (plugin.outMod && plugin.outMod->SetVolume)
 	{
 		plugin.outMod->SetVolume(volume);
 	}
@@ -403,7 +393,7 @@ void setvolume(int volume)
 
 void setpan(int pan)
 {
-	if (plugin.outMod)
+	if (plugin.outMod && plugin.outMod->SetPan)
 	{
 		plugin.outMod->SetPan(pan);
 	}
@@ -444,7 +434,11 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 			{
 				plugin.outMod->Close();
 			}
-			plugin.SAVSADeInit();
+
+			if (plugin.outMod)
+			{
+				plugin.SAVSADeInit();
+			}
 			break;
 		}
 		else if (plugin.outMod->CanWrite() >=
@@ -459,11 +453,16 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 			{
 				tta_error_message(ex.code(), playing_ttafile.GetFileName());
 				PostEOF();
+
 				if (plugin.outMod && plugin.outMod->Close)
 				{
 					plugin.outMod->Close();
 				}
-				plugin.SAVSADeInit();
+
+				if (plugin.outMod)
+				{
+					plugin.SAVSADeInit();
+				}
 				break;
 			}
 
