@@ -57,7 +57,7 @@ const static __int32 PLAYING_BUFFER_LENGTH = 576;
 const static __int32 TRANSCODING_BUFFER_LENGTH = 5120;
 
 // for playing static variables
-static /*__declspec(align(16))*/ CDecodeFile playing_ttafile;
+static /*__declspec(align(16))*/ CDecodeFile* playing_ttafile;
 
 static HANDLE decoder_handle = INVALID_HANDLE_VALUE;
 static DWORD WINAPI __stdcall DecoderThread(void *p);
@@ -208,9 +208,9 @@ void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms)
 	if (!file || !*file)
 	{
 		// invalid filename may be playing file
-		if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
+		if (playing_ttafile && playing_ttafile->isValid() && playing_ttafile->isDecodable())
 		{
-			*length_in_ms = playing_ttafile.GetLengthbymsec();
+			*length_in_ms = playing_ttafile->GetLengthbymsec();
 		}
 		else
 		{
@@ -245,14 +245,22 @@ int isourfile(const wchar_t *filename)
 
 int play(const wchar_t *filename)
 {
-	if (!playing_ttafile.isValid())
+	if (playing_ttafile && !playing_ttafile->isValid())
 	{
 		return 1;
 	}
 
 	try
 	{
-		playing_ttafile.SetFileName(filename);
+		if (!playing_ttafile)
+		{
+			playing_ttafile = new CDecodeFile();
+		}
+
+		if (playing_ttafile)
+		{
+			playing_ttafile->SetFileName(filename);
+		}
 	}
 	catch (CDecodeFile_exception &ex)
 	{
@@ -260,11 +268,16 @@ int play(const wchar_t *filename)
 		return -1;
 	}
 
-	const int samplerate = playing_ttafile.GetSampleRate(),
-			  channels = playing_ttafile.GetNumberofChannel(),
+	if (!playing_ttafile)
+	{
+		return 1;
+	}
+
+	const int samplerate = playing_ttafile->GetSampleRate(),
+			  channels = playing_ttafile->GetNumberofChannel(),
 			  maxlatency = (plugin.outMod && plugin.outMod->Open && samplerate &&
 							channels ? plugin.outMod->Open(samplerate, channels,
-							playing_ttafile.GetOutputBPS(), -1, -1) : -1);
+							playing_ttafile->GetOutputBPS(), -1, -1) : -1);
 	if (maxlatency < 0)
 	{
 		stop();
@@ -272,7 +285,7 @@ int play(const wchar_t *filename)
 	}
 
 	// setup information display
-	plugin.SetInfo(playing_ttafile.GetBitrate(), (samplerate / 1000), channels, 1);
+	plugin.SetInfo(playing_ttafile->GetBitrate(), (samplerate / 1000), channels, 1);
 
 	// initialize vis stuff
 	plugin.SAVSAInit(maxlatency, samplerate);
@@ -298,9 +311,9 @@ int play(const wchar_t *filename)
 
 void pause(void)
 {
-	if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
+	if (playing_ttafile && playing_ttafile->isValid() && playing_ttafile->isDecodable())
 	{
-		playing_ttafile.SetPaused(1);
+		playing_ttafile->SetPaused(1);
 	}
 
 	if (plugin.outMod)
@@ -311,9 +324,9 @@ void pause(void)
 
 void unpause(void)
 {
-	if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
+	if (playing_ttafile && playing_ttafile->isValid() && playing_ttafile->isDecodable())
 	{
-		playing_ttafile.SetPaused(0);
+		playing_ttafile->SetPaused(0);
 	}
 
 	if (plugin.outMod)
@@ -324,9 +337,9 @@ void unpause(void)
 
 int ispaused(void)
 {
-	if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
+	if (playing_ttafile && playing_ttafile->isValid() && playing_ttafile->isDecodable())
 	{
-		return playing_ttafile.GetPaused();
+		return playing_ttafile->GetPaused();
 	}
 	return 0;
 }
@@ -358,18 +371,18 @@ void stop(void)
 
 int getlength(void)
 {
-	if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
+	if (playing_ttafile && playing_ttafile->isValid() && playing_ttafile->isDecodable())
 	{
-		return playing_ttafile.GetLengthbymsec();
+		return playing_ttafile->GetLengthbymsec();
 	}
 	return 0;
 }
 
 int getoutputtime(void)
 {
-	if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
+	if (playing_ttafile && playing_ttafile->isValid() && playing_ttafile->isDecodable())
 	{
-		return (plugin.outMod ? (int)(playing_ttafile.GetDecodePosMs() +
+		return (plugin.outMod ? (int)(playing_ttafile->GetDecodePosMs() +
 			   (plugin.outMod->GetOutputTime() - plugin.outMod->GetWrittenTime())) : 0);
 	}
 	return 0;
@@ -377,9 +390,9 @@ int getoutputtime(void)
 
 void setoutputtime(int time_in_ms)
 {
-	if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
+	if (playing_ttafile && playing_ttafile->isValid() && playing_ttafile->isDecodable())
 	{
-		playing_ttafile.SetSeekNeeded(time_in_ms);
+		playing_ttafile->SetSeekNeeded(time_in_ms);
 	}
 }
 
@@ -405,26 +418,26 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 	static const __int32 PLAYING_BUFFER_SIZE = TTA_FIFO_BUFFER_SIZE;
 	static BYTE pcm_buffer[PLAYING_BUFFER_SIZE];
 
-	if (!playing_ttafile.isValid() || !playing_ttafile.isDecodable())
+	if (!playing_ttafile || !playing_ttafile->isValid() || !playing_ttafile->isDecodable())
 	{
 		tta_error_message(-1, L"");
 		done = 1;
 		return 0;
 	}
 
-	const int channels = playing_ttafile.GetNumberofChannel();
+	const int channels = playing_ttafile->GetNumberofChannel();
 	while (!killDecoderThread)
 	{
-		if (!playing_ttafile.isDecodable())
+		if (!playing_ttafile->isDecodable())
 		{
 			tta_error_message(-1, L"");
 			PostEOF();
 			return 0;
 		}
 
-		if (playing_ttafile.GetSeekNeeded() != -1)
+		if (playing_ttafile->GetSeekNeeded() != -1)
 		{
-			plugin.outMod->Flush((int)playing_ttafile.SeekPosition(&done));
+			plugin.outMod->Flush((int)playing_ttafile->SeekPosition(&done));
 		}
 
 		if (done)
@@ -441,17 +454,16 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 			}
 			break;
 		}
-		else if (plugin.outMod->CanWrite() >=
-			((PLAYING_BUFFER_LENGTH * channels *
-				playing_ttafile.GetByteSize()) << (plugin.dsp_isactive() ? 1 : 0)))
+		else if (plugin.outMod->CanWrite() >= ((PLAYING_BUFFER_LENGTH * channels *
+				playing_ttafile->GetByteSize()) << (plugin.dsp_isactive() ? 1 : 0)))
 		{
 			try
 			{
-				decoded_samples = playing_ttafile.GetSamples(pcm_buffer, PLAYING_BUFFER_SIZE);
+				decoded_samples = playing_ttafile->GetSamples(pcm_buffer, PLAYING_BUFFER_SIZE);
 			}
 			catch (CDecodeFile_exception &ex)
 			{
-				tta_error_message(ex.code(), playing_ttafile.GetFileName());
+				tta_error_message(ex.code(), playing_ttafile->GetFileName());
 				PostEOF();
 
 				if (plugin.outMod && plugin.outMod->Close)
@@ -472,17 +484,17 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 			}
 			else
 			{
-				const int bps = playing_ttafile.GetOutputBPS();
-				if (playing_ttafile.isValid() && playing_ttafile.isDecodable())
+				const int bps = playing_ttafile->GetOutputBPS();
+				if (playing_ttafile->isValid() && playing_ttafile->isDecodable())
 				{
-					plugin.SAAddPCMData(pcm_buffer, channels, bps, (int)playing_ttafile.GetDecodePosMs());
-					/*plugin.VSAAddPCMData(pcm_buffer, channels, bps, (int)playing_ttafile.GetDecodePosMs());*/
+					plugin.SAAddPCMData(pcm_buffer, channels, bps, (int)playing_ttafile->GetDecodePosMs());
+					/*plugin.VSAAddPCMData(pcm_buffer, channels, bps, (int)playing_ttafile->GetDecodePosMs());*/
 				}
 
 				if (plugin.dsp_isactive())
 				{
-					decoded_samples = plugin.dsp_dosamples(reinterpret_cast<short*>(pcm_buffer), decoded_samples, bps,
-						channels, playing_ttafile.GetSampleRate());
+					decoded_samples = plugin.dsp_dosamples(reinterpret_cast<short*>(pcm_buffer), decoded_samples,
+																bps, channels, playing_ttafile->GetSampleRate());
 				}
 
 				plugin.outMod->Write(reinterpret_cast<char *>(pcm_buffer), decoded_samples * channels * (bps >> 3));

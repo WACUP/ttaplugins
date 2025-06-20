@@ -52,16 +52,16 @@ protected:
 
 extern In_Module plugin; // TODO: change if you called yours something else
 
-static AlbumArtFactory albumArtFactory;
+static AlbumArtFactory *albumArtFactory;
 
 void Wasabi_Init()
 {
-	plugin.service->service_register(&albumArtFactory);
+	plugin.service->service_register((albumArtFactory = new AlbumArtFactory()));
 }
 
 void Wasabi_Quit()
 {
-	plugin.service->service_deregister(&albumArtFactory);
+	plugin.service->service_deregister(albumArtFactory);
 }
 
 class TTA_AlbumArtProvider : public svc_albumArtProvider
