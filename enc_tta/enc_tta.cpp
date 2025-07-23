@@ -32,8 +32,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <../loader/loader/utils.h>
 #include <../loader/loader/runtime_helper.h>
 
-#include <strsafe.h>
-
 HWND winampwnd = 0;
 
 SETUP_API_LNG_VARS;
@@ -227,34 +225,34 @@ static void tta_error_message(int error, const wchar_t *filename)
 	std::wstring name(filename);
 	switch (error) {
 	case TTA_OPEN_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Can't open file:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Can't open file:\n%ls", name.c_str());
 		break;
 	case TTA_FORMAT_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Unknown TTA format version:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Unknown TTA format version:\n%ls", name.c_str());
 		break;
 	case TTA_NOT_SUPPORTED:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Not supported file format:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Not supported file format:\n%ls", name.c_str());
 		break;
 	case TTA_FILE_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"File is corrupted:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"File is corrupted:\n%ls", name.c_str());
 		break;
 	case TTA_READ_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Can't read from file:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Can't read from file:\n%ls", name.c_str());
 		break;
 	case TTA_WRITE_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Can't write to file:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Can't write to file:\n%ls", name.c_str());
 		break;
 	case TTA_MEMORY_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Insufficient memory available");
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Insufficient memory available");
 		break;
 	case TTA_SEEK_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"file seek error");
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"file seek error");
 		break;
 	case TTA_PASSWORD_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"password protected file");
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"password protected file");
 		break;
 	default:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Unknown TTA decoder error");
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Unknown TTA decoder error");
 		break;
 	}
 
