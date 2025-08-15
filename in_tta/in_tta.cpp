@@ -127,7 +127,7 @@ void GetFileExtensions(void)
 	if (!plugin.FileExtensions)
 	{
 		// TODO localise
-		plugin.FileExtensions = BuildInputFileListString(L"TTA", L"TTA Audio File (*.TTA)");
+		plugin.FileExtensions = BuildInputFileListString(L"TTA", 3, L"TTA Audio File (*.TTA)", 22);
 	}
 }
 
