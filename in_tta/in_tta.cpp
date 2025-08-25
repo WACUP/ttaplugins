@@ -296,9 +296,7 @@ int play(const wchar_t *filename)
 
 	killDecoderThread = 0;
 
-	decoder_handle = StartThread(DecoderThread, 0, static_cast<int>(plugin.
-								 config->GetInt(playbackConfigGroupGUID,
-								 L"priority", THREAD_PRIORITY_HIGHEST)), 0, NULL);
+	decoder_handle = StartPlaybackThread(DecoderThread, 0, 0, NULL);
 
 	if (!decoder_handle)
 	{
