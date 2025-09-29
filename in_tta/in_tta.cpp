@@ -219,8 +219,7 @@ void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms)
 	}
 	else
 	{
-		TagLib::FileName fn(file);
-		TagLib::TrueAudio::File f(fn);
+		TagLib::TrueAudio::File f(file);
 		if (f.isValid() == true)
 		{
 			*length_in_ms = f.audioProperties()->lengthInMilliseconds();
@@ -289,7 +288,7 @@ int play(const wchar_t *filename)
 
 	// initialize vis stuff
 	plugin.SAVSAInit(maxlatency, samplerate);
-	plugin.VSASetInfo(channels, samplerate);
+	plugin.VSASetInfo(samplerate, channels);
 
 	// set the output plug-ins default volume
 	plugin.outMod->SetVolume(-666);
