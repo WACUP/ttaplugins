@@ -1,6 +1,6 @@
 /*
 The ttaplugins-winamp project.
-Copyright (C) 2005-2015 Yamagata Fumihiro
+Copyright (C) 2005-2025 Yamagata Fumihiro
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -51,13 +51,15 @@ static __inline void hybrid_filter_dec(TTA_fltst *fs, TTAint32 *in) {
 	xmM1 = _mm_load_si128((__m128i*)pM);
 	xmM2 = _mm_load_si128((__m128i*)(pM + 4));
 
-	if (fs->error < 0) {
+	if (fs->error < 0)
+	{
 		xmB1 = _mm_sub_epi32(xmB1, xmM1);
 		xmB2 = _mm_sub_epi32(xmB2, xmM2);
 		_mm_store_si128((__m128i*)pB, xmB1);
 		_mm_store_si128((__m128i*)(pB + 4), xmB2);
 	}
-	else if (fs->error > 0) {
+	else if (fs->error > 0)
+	{
 		xmB1 = _mm_add_epi32(xmB1, xmM1);
 		xmB2 = _mm_add_epi32(xmB2, xmM2);
 		_mm_store_si128((__m128i*)pB, xmB1);
@@ -102,13 +104,15 @@ static __inline void hybrid_filter_enc(TTA_fltst *fs, TTAint32 *in) {
 	xmM1 = _mm_load_si128((__m128i*)pM);
 	xmM2 = _mm_load_si128((__m128i*)(pM + 4));
 
-	if (fs->error < 0) {
+	if (fs->error < 0)
+	{
 		xmB1 = _mm_sub_epi32(xmB1, xmM1);
 		xmB2 = _mm_sub_epi32(xmB2, xmM2);
 		_mm_store_si128((__m128i*)pB, xmB1);
 		_mm_store_si128((__m128i*)(pB + 4), xmB2);
 	}
-	else if (fs->error > 0) {
+	else if (fs->error > 0)
+	{
 		xmB1 = _mm_add_epi32(xmB1, xmM1);
 		xmB2 = _mm_add_epi32(xmB2, xmM2);
 		_mm_store_si128((__m128i*)pB, xmB1);
@@ -147,11 +151,13 @@ static __inline void hybrid_filter_dec(AudioCoderTTA::TTA_fltst *fs, TTAint32 *i
 	TTAint32 *pM = fs->dx;
 	TTAint32 sum = fs->round;
 
-	if (fs->error < 0) {
+	if (fs->error < 0)
+	{
 		pB[0] -= pM[0]; pB[1] -= pM[1]; pB[2] -= pM[2]; pB[3] -= pM[3];
 		pB[4] -= pM[4]; pB[5] -= pM[5]; pB[6] -= pM[6]; pB[7] -= pM[7];
 	}
-	else if (fs->error > 0) {
+	else if (fs->error > 0)
+	{
 		pB[0] += pM[0]; pB[1] += pM[1]; pB[2] += pM[2]; pB[3] += pM[3];
 		pB[4] += pM[4]; pB[5] += pM[5]; pB[6] += pM[6]; pB[7] += pM[7];
 	}
@@ -184,11 +190,13 @@ static __inline void hybrid_filter_enc(AudioCoderTTA::TTA_fltst *fs, TTAint32 *i
 	TTAint32 *pM = fs->dx;
 	TTAint32 sum = fs->round;
 
-	if (fs->error < 0) {
+	if (fs->error < 0)
+	{
 		pB[0] -= pM[0]; pB[1] -= pM[1]; pB[2] -= pM[2]; pB[3] -= pM[3];
 		pB[4] -= pM[4]; pB[5] -= pM[5]; pB[6] -= pM[6]; pB[7] -= pM[7];
 	}
-	else if (fs->error > 0) {
+	else if (fs->error > 0)
+	{
 		pB[0] += pM[0]; pB[1] += pM[1]; pB[2] += pM[2]; pB[3] += pM[3];
 		pB[4] += pM[4]; pB[5] += pM[5]; pB[6] += pM[6]; pB[7] += pM[7];
 	}

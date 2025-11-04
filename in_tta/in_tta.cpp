@@ -12,7 +12,7 @@
 
  /*
  The ttaplugin-winamp project.
- Copyright (C) 2005-2017 Yamagata Fumihiro
+ Copyright (C) 2005-2025 Yamagata Fumihiro
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -205,7 +205,7 @@ void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms)
 {
 	//title = L"";
 
-	if (!file || !*file)
+	if (!file || !*file || (playing_ttafile && SameStr(playing_ttafile->GetFileName(), file)))
 	{
 		// invalid filename may be playing file
 		if (playing_ttafile && playing_ttafile->isValid() && playing_ttafile->isDecodable())
@@ -216,9 +216,9 @@ void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms)
 		{
 			*length_in_ms = 0;
 		}
+		return;
 	}
-	else
-	{
+
 		TagLib::TrueAudio::File f(file);
 		if (f.isValid() == true)
 		{
@@ -228,7 +228,6 @@ void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms)
 		{
 			// cannot get fileinfo
 			*length_in_ms = 0;
-		}
 	}
 }
 

@@ -1,6 +1,6 @@
 /*
 The ttaplugins-winamp project.
-Copyright (C) 2005-2015 Yamagata Fumihiro
+Copyright (C) 2005-2025 Yamagata Fumihiro
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <type_traits>
 
 
-typedef struct {
+typedef struct
+{
 	TTA_io_callback iocb;
 	HANDLE handle;
 } TTA_io_callback_wrapper;
@@ -91,7 +92,8 @@ public:
 
 };
 
-class CDecodeFile_exception : public std::exception {
+class CDecodeFile_exception : public std::exception
+{
 	tta_error err_code;
 
 public:

@@ -1,4 +1,4 @@
-﻿ttaplugins-winamp v3.62
+﻿ttaplugins-winamp v3.72
 =====================================================
 
 *このプラグインは
@@ -7,13 +7,34 @@ taglib(https://github.com/taglib/taglib)をベースとした
 メディアライブラリ読み込み対応を付け加え、ID3v2周りを改変したものです。
 またアルバムアートなどメディアライブラリのメタデータ読み込み機能を付加しました。
 新たにttaファイルへのエンコードプラグインも同梱しています。
-Winamp Ver.2.9以降に対応しており，Winamp Ver.5.8にて動作確認しています。
+Winamp Ver.2.9以降に対応しており，Winamp Ver.5.9.1にて動作確認しています。
 
 
 *インストール方法
  WinampのフォルダにあるPluginsフォルダにin_tta.dllとenc_tta.dllをコピーしてください。
 
 *更新履歴
+2025-10-28 3.72       taglibを最新master(based on 2025/10/25 20:00:24 Commit hash:49be371caab517a6e2c35a6038b8eeb12c9b82ae)ベースに変更(in_tta.dll)
+                      コンパイラをVisual Studio 2022(バージョン 17.14.18)に変更(in_tta.dll, enc_tta.dll)
+2025-06-18 3.71       taglibを最新master(based on 2025/06/14 15:53:30 Commit hash:6563ceaafadf6b2f1997e5582a6bd57cc7b80a57)ベースに変更(in_tta.dll)
+                      コードの見直し(in_tta.dll, enc_tta.dll)
+                      コンパイラをVisual Studio 2022(バージョン 17.14.6)に変更(in_tta.dll, enc_tta.dll)
+2025-05-18 3.70       taglibを最新master(based on 2025/05/17 00:01:23 Commit hash:3ccc390155a30532d25301839c0b8b134681d7a5)ベースに変更(in_tta.dll)
+                      コンパイラをVisual Studio 2022(バージョン 17.14.0)に変更(in_tta.dll, enc_tta.dll)
+2024-10-13 3.69       taglibを最新master(based on 2024/08/24 13:40:41 Commit hash:e3de03501ff66221d1f1f971022b248d5b38ba06)ベースに変更(in_tta.dll)
+                      コンパイラをVisual Studio 2022(バージョン 17.11.5)に変更(in_tta.dll, enc_tta.dll)
+                      AlbumArt.cpp中のTTA_AlbumArtProvider::IsMine() 関数を修正(in_tta.dll)
+2023-07-04 3.68       taglibを最新master(based on 2023/07/01 14:43:27 Commit hash:c840222a391439285478820b4477d5fa6b78d63d)ベースに変更(in_tta.dll)
+                      コンパイラをVisual Studio 2022(バージョン 17.6.4)に変更(in_tta.dll, enc_tta.dll)
+2023-06-03 3.67       taglibを最新master(based on 2023/05/26 20:12:19 Commit hash:39e712796f2dd7336188ae690bc3837049f29aac)ベースに変更(in_tta.dll)
+                      コンパイラをVisual Studio 2022(バージョン 17.6.2)に変更(in_tta.dll, enc_tta.dll)
+2023-02-23 3.66       taglibを最新master(based on 2022/12/21 22:14:35 Commit hash:a31356e330674640a07bef7d71d08242cae8e9bf)ベースに変更(in_tta.dll)
+                      コンパイラをVisual Studio 2022(バージョン 17.5.0)に変更(in_tta.dll, enc_tta.dll)
+2022-05-17 3.65       taglibを最新master(based on 2022/03/16  1:52:44 Commit hash:0470c2894d07523af11f1ac4e2fa7ce85ced26fe)ベースに変更(in_tta.dll)
+                      コンパイラをVisual Studio 2022(バージョン 17.2.0)に変更(in_tta.dll, enc_tta.dll)
+2022-02-24 3.64       taglibを最新master(based on 2022/02/10  4:07:13 Commit hash:8ab618da186f8890cbb8b20f708ddd1f985c6d6b)ベースに変更(in_tta.dll)
+                      コンパイラをVisual Studio 2022(バージョン 17.0.6)に変更(in_tta.dll, enc_tta.dll)
+2021-12-20 3.63       コンパイラをVisual Studio 2022(バージョン 17.0.4)に変更(in_tta.dll, enc_tta.dll)
 2021-08-18 3.62       taglibを最新master(based on 2021/07/10  4:47:36 Commit hash:f58161511050ac6c060d28e75dcd5c5a3af7279c)ベースに変更(in_tta.dll)
                       コンパイラをVisual Studio 2019(バージョン 16.11.1)に変更(in_tta.dll, enc_tta.dll)
 2021-05-09 3.61       taglibを最新master(based on 2021/05/02 19:14:27 Commit hash:4971f8fb032f0cde8c2437cea44b6217b0f37269)ベースに変更(in_tta.dll)

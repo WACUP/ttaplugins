@@ -1,6 +1,6 @@
 /*
 The ttaplugin-winamp project.
-Copyright (C) 2005-2016 Yamagata Fumihiro
+Copyright (C) 2005-2025 Yamagata Fumihiro
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public

@@ -1,6 +1,6 @@
 /*
 The ttaplugins-winamp project.
-Copyright (C) 2005-2015 Yamagata Fumihiro
+Copyright (C) 2005-2025 Yamagata Fumihiro
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -50,7 +50,8 @@ static const int TTA_FORMAT_ENCRYPTED = 2;
 
 #define TTA_ALIGNED(n) __declspec(align(n))
 
-typedef enum tta_error {
+typedef enum tta_error
+{
 	TTA_NO_ERROR,	// no known errors found
 	TTA_OPEN_ERROR,	// can't open file
 	TTA_FORMAT_ERROR,	// not compatible file format
@@ -69,7 +70,8 @@ class AudioCoderTTA : public AudioCoder
 {
 public:
 
-	typedef enum {
+	typedef enum
+	{
 		CPU_ARCH_UNDEFINED,
 		CPU_ARCH_IX86_SSE2,
 		CPU_ARCH_IX86_SSE3,
@@ -77,7 +79,8 @@ public:
 		CPU_ARCH_IX86_SSE4_2
 	} CPU_ARCH_TYPE;
 
-	typedef struct {
+	typedef struct
+	{
 		TTAuint32 format;	// audio format
 		TTAuint32 nch;	// number of channels
 		TTAuint32 bps;	// bits per sample
@@ -85,7 +88,8 @@ public:
 		TTAuint32 samples;	// data length in samples
 	} TTA_ALIGNED(16) TTA_info;
 
-	typedef struct {
+	typedef struct
+	{
 		TTAint32 index;
 		TTAint32 error;
 		TTAint32 round;
@@ -95,20 +99,23 @@ public:
 		TTAint32 dl[24];
 	} TTA_ALIGNED(16) TTA_fltst;
 
-	typedef struct {
+	typedef struct
+	{
 		TTAuint32 k0;
 		TTAuint32 k1;
 		TTAuint32 sum0;
 		TTAuint32 sum1;
 	} TTA_ALIGNED(16) TTA_adapt;
 
-	typedef struct {
+	typedef struct
+	{
 		TTA_fltst fst;
 		TTA_adapt rice;
 		TTAint32 prev;
 	} TTA_ALIGNED(16) TTA_codec;
 
-	typedef struct {
+	typedef struct
+	{
 		TTAuint8 buffer[TTA_FIFO_BUFFER_SIZE];
 		TTAuint8 end;
 		TTAuint8 *pos;
@@ -162,7 +169,8 @@ protected:
 	int smp_size;
 
 
-	typedef struct _buffer {
+	typedef struct _buffer
+	{
 		size_t	data_length;
 		size_t	current_pos;
 		size_t	current_end_pos;

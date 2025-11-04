@@ -1,4 +1,4 @@
-ttaplugins-winamp v3.62
+ttaplugins-winamp v3.72
 =====================================================
 
 *This plugin 
@@ -8,12 +8,33 @@ The modification is ID3v2 Tag read/write function using
 taglib(https://github.com/taglib/taglib).
 And add read metadata (include album art) for MediaLibray.
 Additionally, tta encode plugin is included.
-This plugin performs Winamp Ver.2.9 or newer and tested by Winamp Ver.5.8.
+This plugin performs Winamp Ver.2.9 or newer and tested on Winamp Ver.5.9.1.
 
 *Install
  Please copy in_tta.dll and enc_tta.dll to Plugins folder in Winamp.
 
 *Release Notes
+2025-10-28 3.72       Change upstream tablib master (based on 2025/10/25 20:00:24 Commit hash:49be371caab517a6e2c35a6038b8eeb12c9b82ae)(in_tta.dll)
+                      Change compiler to Visual Studio 2022 (Version 17.14.18)(in_tta.dll, enc_tta.dll)
+2025-06-18 3.71       Change upstream tablib master (based on 2025/06/14 15:53:30 Commit hash:6563ceaafadf6b2f1997e5582a6bd57cc7b80a57)(in_tta.dll)
+                      Improve code stability and Fix coding style(in_tta.dll, enc_tta.dll)
+                      Change compiler to Visual Studio 2022 (Version 17.14.6)(in_tta.dll, enc_tta.dll)
+2025-05-18 3.70       Change upstream tablib master (based on 2025/05/17 00:01:23 Commit hash:3ccc390155a30532d25301839c0b8b134681d7a5)(in_tta.dll)
+                      Change compiler to Visual Studio 2022 (Version 17.14.0)(in_tta.dll, enc_tta.dll)
+2024-10-13 3.69       Change upstream tablib master (based on 2024/08/24 13:40:41 Commit hash:e3de03501ff66221d1f1f971022b248d5b38ba06)(in_tta.dll)
+                      Change compiler to Visual Studio 2022 (Version 17.11.5)(in_tta.dll, enc_tta.dll)
+                      Fix TTA_AlbumArtProvider::IsMine() in AlbumArt.cpp(in_tta.dll)
+2023-07-04 3.68       Change upstream tablib master (based on 2023/07/01 14:43:27 Commit hash:c840222a391439285478820b4477d5fa6b78d63d)(in_tta.dll)
+                      Change compiler to Visual Studio 2022 (Version 17.6.4)(in_tta.dll, enc_tta.dll)
+2023-06-03 3.67       Change upstream tablib master (based on 2023/05/26 20:12:19 Commit hash:39e712796f2dd7336188ae690bc3837049f29aac)(in_tta.dll)
+                      Change compiler to Visual Studio 2022 (Version 17.6.2)(in_tta.dll, enc_tta.dll)
+2023-02-23 3.66       Change upstream tablib master (based on 2022/12/21 22:14:35 Commit hash:a31356e330674640a07bef7d71d08242cae8e9bf)(in_tta.dll)
+                      Change compiler to Visual Studio 2022 (Version 17.5.0)(in_tta.dll, enc_tta.dll)
+2022-05-17 3.65       Change upstream tablib master (based on 2022/03/16  1:52:44 Commit hash:0470c2894d07523af11f1ac4e2fa7ce85ced26fe)(in_tta.dll)
+                      Change compiler to Visual Studio 2022 (Version 17.2.0)(in_tta.dll, enc_tta.dll)
+2022-02-24 3.64       Change upstream taglib master (based on 2022/02/10  4:07:13 Commit hash:8ab618da186f8890cbb8b20f708ddd1f985c6d6b)(in_tta.dll)
+                      Change compiler to Visual Studio 2022 (Version 17.0.6)(in_tta.dll, enc_tta.dll)
+2021-12-20 3.63       Change compiler to Visual Studio 2022 (Version 17.0.4)(in_tta.dll, enc_tta.dll)
 2021-08-18 3.62       Change upstream taglib master (based on 2021/07/10  4:47:36 Commit hash:f58161511050ac6c060d28e75dcd5c5a3af7279c)(in_tta.dll)
                       Change compiler to Visual Studio 2019 (Version 16.11.1)(in_tta.dll, enc_tta.dll)
 2021-05-09 3.61       Change upstream taglib master (based on 2021/05/02 19:14:27 Commit hash:4971f8fb032f0cde8c2437cea44b6217b0f37269)(in_tta.dll)

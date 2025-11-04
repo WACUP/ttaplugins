@@ -1,6 +1,6 @@
 /*
 The ttaplugins-winamp project.
-Copyright (C) 2005-2015 Yamagata Fumihiro
+Copyright (C) 2005-2025 Yamagata Fumihiro
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -35,7 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //////////////////////// constants and definitions //////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
-const TTAuint32 bit_mask[] = {
+const TTAuint32 bit_mask[] =
+{
 	0x00000000, 0x00000001, 0x00000003, 0x00000007,
 	0x0000000f, 0x0000001f, 0x0000003f, 0x0000007f,
 	0x000000ff, 0x000001ff, 0x000003ff, 0x000007ff,
@@ -47,7 +48,8 @@ const TTAuint32 bit_mask[] = {
 	0xffffffff
 }; // bit_mask
 
-const TTAuint32 bit_shift[] = {
+const TTAuint32 bit_shift[] =
+{
 	0x00000001, 0x00000002, 0x00000004, 0x00000008,
 	0x00000010, 0x00000020, 0x00000040, 0x00000080,
 	0x00000100, 0x00000200, 0x00000400, 0x00000800,
@@ -62,7 +64,8 @@ const TTAuint32 bit_shift[] = {
 
 const TTAuint32 *shift_16 = bit_shift + 4;
 
-const TTAuint32 crc32_table[256] = {
+const TTAuint32 crc32_table[256] =
+{
 	0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
 	0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
 	0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2,
@@ -108,7 +111,8 @@ const TTAuint32 crc32_table[256] = {
 	0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 }; // crc32_table
 
-const TTAuint32 crc64_table_lo[256] = {
+const TTAuint32 crc64_table_lo[256] =
+{
 	0x00000000, 0xa9ea3693, 0x53d46d26, 0xfa3e5bb5, 0x0e42ecdf, 0xa7a8da4c,
 	0x5d9681f9, 0xf47cb76a, 0x1c85d9be, 0xb56fef2d, 0x4f51b498, 0xe6bb820b,
 	0x12c73561, 0xbb2d03f2, 0x41135847, 0xe8f96ed4, 0x90e185ef, 0x390bb37c,
@@ -154,7 +158,8 @@ const TTAuint32 crc64_table_lo[256] = {
 	0x34bbeeb2, 0x9d51d821, 0x676f8394, 0xce85b507
 }; // crc64_table_lo
 
-const TTAuint32 crc64_table_hi[256] = {
+const TTAuint32 crc64_table_hi[256] =
+{
 	0x00000000, 0x42f0e1eb, 0x85e1c3d7, 0xc711223c, 0x49336645, 0x0bc387ae,
 	0xccd2a592, 0x8e224479, 0x9266cc8a, 0xd0962d61, 0x17870f5d, 0x5577eeb6,
 	0xdb55aacf, 0x99a54b24, 0x5eb46918, 0x1c4488f3, 0x663d78ff, 0x24cd9914,
@@ -236,19 +241,22 @@ const TTAint32 flt_set[3] = { 10, 9, 10 };
 /////////////////////////////////////////////////////////////////////////////
 
 
-__forceinline void rice_init(AudioCoderTTA::TTA_adapt *rice, TTAuint32 k0, TTAuint32 k1) {
+__forceinline void rice_init(AudioCoderTTA::TTA_adapt *rice, TTAuint32 k0, TTAuint32 k1)
+{
 	rice->k0 = k0;
 	rice->k1 = k1;
 	rice->sum0 = shift_16[k0];
 	rice->sum1 = shift_16[k1];
 } // rice_init
 
-void compute_key_digits(void const *pstr, TTAuint32 len, TTAint8 *out) {
+void compute_key_digits(void const *pstr, TTAuint32 len, TTAint8 *out)
+{
 	TTAint8 *cstr = (TTAint8 *)pstr;
 	TTAuint32 crc_lo = 0xffffffff;
 	TTAuint32 crc_hi = 0xffffffff;
 
-	while (len--) {
+	while (len--)
+	{
 		TTAuint32 tab_index = ((crc_hi >> 24) ^ *cstr++) & 0xff;
 		crc_hi = crc64_table_hi[tab_index] ^ ((crc_hi << 8) | (crc_lo >> 24));
 		crc_lo = crc64_table_lo[tab_index] ^ (crc_lo << 8);
@@ -271,7 +279,8 @@ void compute_key_digits(void const *pstr, TTAuint32 len, TTAint8 *out) {
   //////////////////////////// TTA filter init ////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////
 
-void AudioCoderTTA::filter_init(AudioCoderTTA::TTA_fltst *fs, TTAint8 *data, TTAint32 shift) {
+void AudioCoderTTA::filter_init(AudioCoderTTA::TTA_fltst *fs, TTAint8 *data, TTAint32 shift)
+{
 	tta_memclear(fs, sizeof(TTA_fltst));
 	fs->shift = shift;
 	fs->round = 1 << (shift - 1);
@@ -303,16 +312,20 @@ void AudioCoderTTA::writer_reset()
 	fifo.count = 0;
 } // writer_reset
 
-void AudioCoderTTA::writer_done() {
+void AudioCoderTTA::writer_done()
+{
 	TTAint32 buffer_size = (TTAint32)(fifo.pos - fifo.buffer);
 
-	if (buffer_size) {
+	if (buffer_size)
+	{
 		size_t len = min(buffer_size, (TTAint32)(remain_data_buffer.data_length - remain_data_buffer.current_end_pos));
 		memcpy_s(remain_data_buffer.buffer + remain_data_buffer.current_end_pos,
 			remain_data_buffer.data_length - remain_data_buffer.current_end_pos,
 			fifo.buffer, len);
 		if (len != buffer_size)
+		{
 			throw AudioCoderTTA_exception(TTA_WRITE_ERROR);
+		}
 		remain_data_buffer.current_end_pos += len;
 		if (remain_data_buffer.current_pos == remain_data_buffer.current_end_pos)
 		{
@@ -325,7 +338,8 @@ void AudioCoderTTA::writer_done() {
 
 void AudioCoderTTA::write_byte(TTAuint32 value)
 {
-	if (fifo.pos == &fifo.end) {
+	if (fifo.pos == &fifo.end)
+	{
 		size_t len = min(TTA_FIFO_BUFFER_SIZE, remain_data_buffer.data_length - remain_data_buffer.current_end_pos);
 		if (len <= 0)
 		{
@@ -344,28 +358,33 @@ void AudioCoderTTA::write_byte(TTAuint32 value)
 	*fifo.pos++ = (value & 0xff);
 } // write_byte
 
-void AudioCoderTTA::write_uint16(TTAuint32 value) {
+void AudioCoderTTA::write_uint16(TTAuint32 value)
+{
 	write_byte(value);
 	write_byte(value >>= 8);
 } // write_uint16
 
-void AudioCoderTTA::write_uint32(TTAuint32 value) {
+void AudioCoderTTA::write_uint32(TTAuint32 value)
+{
 	write_byte(value);
 	write_byte(value >>= 8);
 	write_byte(value >>= 8);
 	write_byte(value >>= 8);
 } // write_uint32
 
-void AudioCoderTTA::write_crc32() {
+void AudioCoderTTA::write_crc32()
+{
 	TTAuint32 crc = fifo.crc ^ 0xffffffffUL;
 	write_uint32(crc);
 } // write_crc32
 
-void AudioCoderTTA::writer_skip_bytes(TTAuint32 size) {
+void AudioCoderTTA::writer_skip_bytes(TTAuint32 size)
+{
 	while (size--) write_byte(0);
 } // writer_skip_bytes
 
-TTAuint32 AudioCoderTTA::write_tta_header() {
+TTAuint32 AudioCoderTTA::write_tta_header()
+{
 	writer_reset();
 
 	// write TTA1 signature
@@ -385,17 +404,21 @@ TTAuint32 AudioCoderTTA::write_tta_header() {
 	return 22; // sizeof TTA1 header
 } // write_tta_header
 
-void AudioCoderTTA::write_seek_table() {
+void AudioCoderTTA::write_seek_table()
+{
 	TTAuint32 i, tmp;
 
 	if (seek_table == NULL)
+	{
 		return;
+	}
 
 
 	writer_start();
 	writer_reset();
 
-	for (i = 0; i < frames; i++) {
+	for (i = 0; i < frames; i++)
+	{
 		tmp = seek_table[i] & 0xffffffffUL;
 		write_uint32(tmp);
 	}
@@ -404,22 +427,30 @@ void AudioCoderTTA::write_seek_table() {
 	writer_done();
 } // write_seek_table
 
-void AudioCoderTTA::set_password(void const *pstr, TTAuint32 len) {
+void AudioCoderTTA::set_password(void const *pstr, TTAuint32 len)
+{
 	compute_key_digits(pstr, len, data);
 } // set_password
 
-void AudioCoderTTA::frame_init(TTAuint32 frame) {
+void AudioCoderTTA::frame_init(TTAuint32 frame)
+{
 	TTAint32 shift = flt_set[depth - 1];
 	TTA_codec *enc = encoder;
 
 	fnum = frame;
 
 	if (fnum == frames - 1)
+	{
 		flen = flen_last;
-	else flen = flen_std;
+	}
+	else
+	{
+		flen = flen_std;
+	}
 
 	// init entropy encoder
-	do {
+	do
+	{
 		filter_init(&enc->fst, data, shift);
 		rice_init(&enc->rice, 10, 10);
 		enc->prev = 0;
@@ -442,7 +473,9 @@ void AudioCoderTTA::init_set_info(TTAuint64 pos) {
 		info.bps < MIN_BPS ||
 		info.bps > MAX_BPS ||
 		info.nch > MAX_NCH)
+	{
 		throw AudioCoderTTA_exception(TTA_FORMAT_ERROR);
+	}
 
 	// set start position if required
 
@@ -463,7 +496,11 @@ void AudioCoderTTA::init_set_info(TTAuint64 pos) {
 	flen_std = MUL_FRAME_TIME(info.sps);
 	flen_last = info.samples % flen_std;
 	frames = info.samples / flen_std + (flen_last ? 1 : 0);
-	if (!flen_last) flen_last = flen_std;
+
+	if (!flen_last)
+	{
+		flen_last = flen_std;
+	}
 	rate = 0;
 
 	// allocate memory for seek table data
@@ -476,7 +513,9 @@ void AudioCoderTTA::init_set_info(TTAuint64 pos) {
 		// Do nothing
 	}
 	if (seek_table == NULL)
+	{
 		throw AudioCoderTTA_exception(TTA_MEMORY_ERROR);
+	}
 
 	if (info.samples != MAX_SAMPLES)
 	{
@@ -495,7 +534,8 @@ void AudioCoderTTA::init_set_info(TTAuint64 pos) {
 	frame_init(0);
 } // init_set_info
 
-__forceinline void AudioCoderTTA::put_value(TTA_adapt *rice, TTAint32 value) {
+__forceinline void AudioCoderTTA::put_value(TTA_adapt *rice, TTAint32 value)
+{
 	TTAuint32 k, unary, outval;
 
 	outval = ENC(value);
@@ -505,38 +545,54 @@ __forceinline void AudioCoderTTA::put_value(TTA_adapt *rice, TTAint32 value) {
 
 	rice->sum0 += outval - (rice->sum0 >> 4);
 	if (rice->k0 > 0 && rice->sum0 < shift_16[rice->k0])
+	{
 		rice->k0--;
+	}
 	else if (rice->sum0 > shift_16[rice->k0 + 1])
+	{
 		rice->k0++;
+	}
 
-	if (outval >= bit_shift[k]) {
+	if (outval >= bit_shift[k])
+	{
 		outval -= bit_shift[k];
 		k = rice->k1;
 
 		rice->sum1 += outval - (rice->sum1 >> 4);
 		if (rice->k1 > 0 && rice->sum1 < shift_16[rice->k1])
+		{
 			rice->k1--;
+		}
 		else if (rice->sum1 > shift_16[rice->k1 + 1])
+		{
 			rice->k1++;
+		}
 
 		unary = 1 + (outval >> k);
 	}
-	else unary = 0;
+	else
+	{
+		unary = 0;
+	}
 
 	// put unary
-	do {
-		while (fifo.bcount >= 8) {
+	do
+	{
+		while (fifo.bcount >= 8)
+		{
 			write_byte(fifo.bcache);
 			fifo.bcache >>= 8;
 			fifo.bcount -= 8;
 		}
 
-		if (unary > 23) {
+		if (unary > 23)
+		{
 			fifo.bcache |= bit_mask[23] << fifo.bcount;
 			fifo.bcount += 23;
 			unary -= 23;
 		}
-		else {
+		else
+		{
 			fifo.bcache |= bit_mask[unary] << fifo.bcount;
 			fifo.bcount += unary + 1;
 			unary = 0;
@@ -544,20 +600,24 @@ __forceinline void AudioCoderTTA::put_value(TTA_adapt *rice, TTAint32 value) {
 	} while (unary);
 
 	// put binary
-	while (fifo.bcount >= 8) {
+	while (fifo.bcount >= 8)
+	{
 		write_byte(fifo.bcache);
 		fifo.bcache >>= 8;
 		fifo.bcount -= 8;
 	}
 
-	if (k) {
+	if (k)
+	{
 		fifo.bcache |= (outval & bit_mask[k]) << fifo.bcount;
 		fifo.bcount += k;
 	}
 } // put_value
 
-__forceinline void AudioCoderTTA::flush_bit_cache() {
-	while (fifo.bcount) {
+__forceinline void AudioCoderTTA::flush_bit_cache()
+{
+	while (fifo.bcount)
+	{
 		write_byte(fifo.bcache);
 		fifo.bcache >>= 8;
 		fifo.bcount = (fifo.bcount > 8) ? (fifo.bcount - 8) : 0;
@@ -574,24 +634,34 @@ void AudioCoderTTA::process_stream()
 	TTAint32 res = 0;
 	TTAint32 in_bytes = (TTAint32)(input_data_buffer.current_end_pos - input_data_buffer.current_pos);
 
-	if (!in_bytes) return;
+	if (!in_bytes)
+	{
+		return;
+	}
 
 	READ_BUFFER(temp, ptr, depth, shift_bits);
 	next = temp >> shift_bits;
 
-	do {
+	do
+	{
 		curr = next;
-		if (ptr <= pend) {
+		if (ptr <= pend)
+		{
 			READ_BUFFER(temp, ptr, depth, shift_bits);
 			next = temp >> shift_bits;
 		}
 
 		// transform data
-		if (encoder_last != encoder) {
-			if (enc < encoder_last) {
+		if (encoder_last != encoder)
+		{
+			if (enc < encoder_last)
+			{
 				curr = res = next - curr;
 			}
-			else curr -= res / 2;
+			else
+			{
+				curr -= res / 2;
+			}
 		}
 
 		// compress stage 1: fixed order 1 prediction
@@ -604,15 +674,18 @@ void AudioCoderTTA::process_stream()
 
 		put_value(&enc->rice, curr);
 
-		if (enc < encoder_last) {
+		if (enc < encoder_last)
+		{
 			enc++;
 		}
-		else {
+		else
+		{
 			enc = encoder;
 			fpos++;
 		}
 
-		if (fpos == flen) {
+		if (fpos == flen)
+		{
 			flush_bit_cache();
 			seek_table[fnum++] = fifo.count;
 
@@ -626,31 +699,42 @@ void AudioCoderTTA::process_stream()
 	input_data_buffer.current_end_pos = input_data_buffer.current_pos;
 } // process_stream
 
-void AudioCoderTTA::process_frame(TTAuint8 *input, TTAuint32 in_bytes) {
+void AudioCoderTTA::process_frame(TTAuint8 *input, TTAuint32 in_bytes)
+{
 	TTA_codec *enc = encoder;
 	TTAuint8 *ptr = input;
 	TTAuint8 *pend = input + in_bytes;
 	TTAint32 curr, next, temp;
 	TTAint32 res = 0;
 
-	if (!in_bytes) return;
+	if (!in_bytes)
+	{
+		return;
+	}
 
 	READ_BUFFER(temp, ptr, depth, shift_bits);
 	next = temp >> shift_bits;
 
-	do {
+	do
+	{
 		curr = next;
-		if (ptr <= pend) {
+		if (ptr <= pend)
+		{
 			READ_BUFFER(temp, ptr, depth, shift_bits);
 			next = temp >> shift_bits;
 		}
 
 		// transform data
-		if (encoder_last != encoder) {
-			if (enc < encoder_last) {
+		if (encoder_last != encoder)
+		{
+			if (enc < encoder_last)
+			{
 				curr = res = next - curr;
 			}
-			else curr -= res / 2;
+			else
+			{
+				curr -= res / 2;
+			}
 		}
 
 		// compress stage 1: fixed order 1 prediction
@@ -663,15 +747,18 @@ void AudioCoderTTA::process_frame(TTAuint8 *input, TTAuint32 in_bytes) {
 
 		put_value(&enc->rice, curr);
 
-		if (enc < encoder_last) {
+		if (enc < encoder_last)
+		{
 			enc++;
 		}
-		else {
+		else
+		{
 			enc = encoder;
 			fpos++;
 		}
 
-		if (fpos == flen) {
+		if (fpos == flen)
+		{
 			flush_bit_cache();
 
 			// update dynamic info
@@ -731,7 +818,8 @@ AudioCoderTTA::AudioCoderTTA(int nch, int srate, int bps)
 	if ((info.nch == 0) ||
 		(info.nch > MAX_NCH) ||
 		(info.bps == 0) ||
-		(info.bps > MAX_BPS)) {
+		(info.bps > MAX_BPS))
+	{
 		//		AudioCoderTTA_exception(TTA_FORMAT_ERROR);
 		error = 1;
 	}
@@ -915,6 +1003,7 @@ void AudioCoderTTA::FinishAudio(const wchar_t *filename)
 		L"enc",     // temp file name prefix 
 		0,                // create unique name 
 		szTempFileName);  // buffer for name 
+
 	if (uRetVal == 0)
 	{
 		throw AudioCoderTTA_exception(TTA_WRITE_ERROR);
@@ -935,6 +1024,7 @@ void AudioCoderTTA::FinishAudio(const wchar_t *filename)
 		OPEN_EXISTING,         // existing file only 
 		FILE_ATTRIBUTE_NORMAL, // normal file 
 		NULL);                 // no template 
+
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
 		throw AudioCoderTTA_exception(TTA_READ_ERROR);
