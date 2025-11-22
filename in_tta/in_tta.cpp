@@ -85,8 +85,12 @@ void setvolume(int volume);
 void setpan(int pan);
 void GetFileExtensions(void);
 
+#define OUR_INPUT_PLUG_IN_FEATURES INPUT_HAS_READ_META | INPUT_HAS_WRITE_META | INPUT_USES_UNIFIED_ALT3 | \
+								   INPUT_HAS_FORMAT_CONVERSION_UNICODE | INPUT_HAS_FORMAT_CONVERSION_SET_TIME_MODE
+
 In_Module plugin = {
 	IN_VER_WACUP,
+    IN_INIT_PRE_FEATURES
 	"TTA Audio Decoder " PLUGIN_VERSION_CHAR,
 	NULL,		// hMainWindow
 	NULL,		// hDllInstance
@@ -116,8 +120,7 @@ In_Module plugin = {
 	NULL,		// setinfo
 	NULL,		// out_mod
 	NULL,       // api_service
-	INPUT_HAS_READ_META | INPUT_HAS_WRITE_META | INPUT_USES_UNIFIED_ALT3 |
-	INPUT_HAS_FORMAT_CONVERSION_UNICODE | INPUT_HAS_FORMAT_CONVERSION_SET_TIME_MODE,
+    IN_INIT_POST_FEATURES
 	GetFileExtensions,	// loading optimisation
 	IN_INIT_WACUP_END_STRUCT
 };
@@ -219,15 +222,15 @@ void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms)
 		return;
 	}
 
-		TagLib::TrueAudio::File f(file);
-		if (f.isValid() == true)
-		{
-			*length_in_ms = f.audioProperties()->lengthInMilliseconds();
-		}
-		else
-		{
-			// cannot get fileinfo
-			*length_in_ms = 0;
+	TagLib::TrueAudio::File f(file);
+	if (f.isValid() == true)
+	{
+		*length_in_ms = f.audioProperties()->lengthInMilliseconds();
+	}
+	else
+	{
+		// cannot get fileinfo
+		*length_in_ms = 0;
 	}
 }
 
@@ -286,8 +289,12 @@ int play(const wchar_t *filename)
 	plugin.SetInfo(playing_ttafile->GetBitrate(), (samplerate / 1000), channels, 1);
 
 	// initialize vis stuff
+#ifndef _WIN64
 	plugin.SAVSAInit(maxlatency, samplerate);
 	plugin.VSASetInfo(samplerate, channels);
+#else
+	plugin.VisInitInfo(maxlatency, samplerate, channels);
+#endif
 
 	// set the output plug-ins default volume
 	plugin.outMod->SetVolume(-666);
