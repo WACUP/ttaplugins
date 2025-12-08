@@ -262,9 +262,10 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 	if (FindTag) {
 		RetCode = 1;
 
-		if (SameStrA(Metadata, "length"))
+		const bool length_seconds = SameStrA(Metadata, "length_seconds");
+		if (length_seconds || SameStrA(Metadata, "length"))
 		{
-			I2WStr(TagDataW.Length, dest, destlen);
+			I2WStr((!length_seconds ? TagDataW.Length : (TagDataW.Length / 1000)), dest, destlen);
 		}
 		else if (SameStrA(Metadata, "formatinformation"))
 		{
