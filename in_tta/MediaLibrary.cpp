@@ -195,9 +195,6 @@ bool CMediaLibrary::GetTagInfo(const std::wstring fn)
 
 int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, wchar_t *dest, const size_t destlen)
 {
-	bool FindTag;
-	int RetCode;
-
 	if (SameStrA(Metadata, "type") ||
 		SameStrA(Metadata, "streammetadata"))
 	{
@@ -208,8 +205,7 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 	else if (SameStrA(Metadata, "family"))
 	{
 		// TODO localise
-		wcsncpy_s(dest, destlen, L"The True Audio File", _TRUNCATE);
-		return 1;
+		return (int)CopyCchStrEx(dest, destlen, L"The True Audio File");
 	}
 	else if (SameStrA(Metadata, "lossless"))
 	{
@@ -246,6 +242,7 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 
 	::EnterCriticalSection(&CriticalSection);
 
+	bool FindTag;
 	if (std::wstring(fn) != FileName)
 	{
 		FindTag = GetTagInfo(fn);
@@ -259,99 +256,98 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 		FindTag = true;
 	}
 
-	if (FindTag) {
-		RetCode = 1;
-
+	int RetCode = 0;
+	if (FindTag)
+	{
 		const bool length_seconds = SameStrA(Metadata, "length_seconds");
 		if (length_seconds || SameStrA(Metadata, "length"))
 		{
-			I2WStr((!length_seconds ? TagDataW.Length : (TagDataW.Length / 1000)), dest, destlen);
+			I2WStrLen((!length_seconds ? TagDataW.Length : (TagDataW.Length / 1000)), dest, destlen, &RetCode);
 		}
 		else if (SameStrA(Metadata, "formatinformation"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Format.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Format.c_str());
 		}
 		else if (SameStrA(Metadata, "title"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Title.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Title.c_str());
 		}
 		else if (SameStrA(Metadata, "artist"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Artist.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Artist.c_str());
 		}
 		else if (SameStrA(Metadata, "albumartist"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.AlbumArtist.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.AlbumArtist.c_str());
 		}
 		else if (SameStrA(Metadata, "comment"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Comment.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Comment.c_str());
 		}
 		else if (SameStrA(Metadata, "album"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Album.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Album.c_str());
 		}
 		else if (SameStrA(Metadata, "year"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Year.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Year.c_str());
 		}
 		else if (SameStrA(Metadata, "genre"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Genre.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Genre.c_str());
 		}
 		else if (SameStrA(Metadata, "track"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Track.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Track.c_str());
 		}
 		else if (SameStrA(Metadata, "tracks"))
 		{
-			size_t slash_pos = TagDataW.Track.find_first_of(L'/');
+			const size_t slash_pos = TagDataW.Track.find_first_of(L'/');
 			if (slash_pos != std::wstring::npos)
 			{
-				wcsncpy_s(dest, destlen, TagDataW.Track.substr(slash_pos + 1).c_str(), _TRUNCATE);
+				RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Track.substr(slash_pos + 1).c_str());
 			}
 		}
 		else if (SameStrA(Metadata, "composer"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Composer.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Composer.c_str());
 		}
 		else if (SameStrA(Metadata, "publisher"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Publisher.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Publisher.c_str());
 		}
 		else if (SameStrA(Metadata, "disc"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Disc.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Disc.c_str());
 		}
 		else if (SameStrA(Metadata, "discs"))
 		{
-			size_t slash_pos = TagDataW.Disc.find_first_of(L'/');
+			const size_t slash_pos = TagDataW.Disc.find_first_of(L'/');
 			if (slash_pos != std::wstring::npos)
 			{
-				wcsncpy_s(dest, destlen, TagDataW.Disc.substr(slash_pos + 1).c_str(), _TRUNCATE);
+				RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Disc.substr(slash_pos + 1).c_str());
 			}
 		}
 		else if (SameStrA(Metadata, "bpm"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.BPM.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.BPM.c_str());
 		}
 		else if (SameStrA(Metadata, "bitrate"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Bitrate.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Bitrate.c_str());
 		}
 		else if (SameStrA(Metadata, "samplerate"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.Samplerate.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.Samplerate.c_str());
 		}
 		else if (SameStrA(Metadata, "bitdepth"))
 		{
-			wcsncpy_s(dest, destlen, TagDataW.BitDepth.c_str(), _TRUNCATE);
+			RetCode = (int)CopyCchStrEx(dest, destlen, TagDataW.BitDepth.c_str());
 		}
 		else
 		{
 			RetCode = 0;
 		}
-
 	}
 	else
 	{

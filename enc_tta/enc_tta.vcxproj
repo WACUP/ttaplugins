@@ -151,6 +151,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\libtta-cpp\libtta.h" />
+    <ClInclude Include="..\libtta-cpp\tta_encoder_extend.h" />
     <ClInclude Include="AudioCoderTTA.h" />
     <ClInclude Include="enc_tta.h" />
     <ClInclude Include="filter.h" />
@@ -160,6 +162,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\libtta-cpp\libtta.cpp" />
+    <ClCompile Include="..\libtta-cpp\tta_encoder_extend.cpp" />
     <ClCompile Include="AudioCoderTTA.cpp" />
     <ClCompile Include="enc_tta.cpp" />
     <ClCompile Include="stdafx.cpp" />
@@ -169,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="enc_tta.def" />
+    <None Include="enc_tta_x64.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

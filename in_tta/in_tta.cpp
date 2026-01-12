@@ -185,8 +185,8 @@ void about(HWND hwndParent)
 	// TODO localise
 	wchar_t message[2048]/* = { 0 }*/;
 	PrintfCch(message, ARRAYSIZE(message), (LPCWSTR)output,
-			  (LPCWSTR)plugin.description, WACUP_Author(),
-			  WACUP_Copyright(), TEXT(__DATE__));
+			  (LPCWSTR)plugin.description, WACUP_Copyright(),
+			  WACUP_Author(), WACUP_Copyright(), TEXT(__DATE__));
 	AboutMessageBox(hwndParent, message, L"True Audio Decoder");
 	SafeFree((void*)output);
 }

@@ -36,6 +36,12 @@
     <ClInclude Include="resource1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\libtta-cpp\tta_encoder_extend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libtta-cpp\libtta.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -47,6 +53,12 @@
     <ClCompile Include="AudioCoderTTA.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\libtta-cpp\tta_encoder_extend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libtta-cpp\libtta.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="out_tta.rc">
@@ -55,6 +67,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="enc_tta.def">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="enc_tta_x64.def">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

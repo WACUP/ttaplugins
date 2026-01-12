@@ -1,20 +1,21 @@
 /*
 The ttaplugins-winamp project.
-Copyright (C) 2005-2025 Yamagata Fumihiro
+Copyright (C) 2005-2026 Yamagata Fumihiro
 
-This library is free software; you can redistribute it and/or
+This file is part of enc_tta.
+
+enc_tta is free software: you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or any later version.
+License as published by the Free Software Foundation, either
+version 3 of the License, or any later version.
 
-This library is distributed in the hope that it will be useful,
+enc_tta is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+You should have received a copy of the GNU General Public License along with enc_tta.
+If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -67,7 +68,7 @@ static HINSTANCE GetMyInstance()
 	MEMORY_BASIC_INFORMATION mbi/* = { 0 }*/;
 	if (VirtualQuery(GetMyInstance, &mbi, sizeof(mbi)))
 		return (HINSTANCE)mbi.AllocationBase;
-	return NULL;
+	return nullptr;
 }
 #endif
 
@@ -111,23 +112,16 @@ extern "C"
 			//			configtype cfg;
 			//			readconfig(configfile, &cfg);
 
-			AudioCoderTTA *t = 0;
+			AudioCoderTTA *t = nullptr;
 			t = new AudioCoderTTA(nch, srate, bps);
 			if (t->GetLastError())
 			{
 				delete t;
-				return NULL;
+				return nullptr;;
 			}
 			return t;
 		}
-		return NULL;
-	}
-
-	void __declspec(dllexport) FinishAudio3(const char *filename, AudioCoder *coder)
-	{
-		wchar_t wfilename[MAX_PATHLEN + 1]/* = { 0 }*/;
-		ConvertANSI(filename, -1, CP_ACP, wfilename, ARRAYSIZE(wfilename), NULL);
-		((AudioCoderTTA*)coder)->FinishAudio(wfilename);
+		return nullptr;;
 	}
 
 	void __declspec(dllexport) FinishAudio3W(const wchar_t *filename, AudioCoder *coder)
@@ -139,6 +133,15 @@ extern "C"
 	{
 		((AudioCoderTTA*)coder)->PrepareToFinish();
 	}
+
+#ifndef _WIN64
+	void __declspec(dllexport) FinishAudio3(const char* filename, AudioCoder* coder)
+	{
+		wchar_t wfilename[MAX_PATHLEN + 1]/* = { 0 }*/;
+		ConvertANSI(filename, -1, CP_ACP, wfilename, ARRAYSIZE(wfilename), NULL);
+		((AudioCoderTTA*)coder)->FinishAudio(wfilename);
+	}
+#endif
 
 	void __declspec(dllexport) PrepareToFinishW(const wchar_t *filename, AudioCoder *coder)
 	{
@@ -193,7 +196,7 @@ extern "C"
 			//GetLocalisationApiService(hinst);
 			//			return LangCreateDialog(IDD_CONFIG, hwndParent, DlgProc, (LPARAM)wc);
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	int __declspec(dllexport) SetConfigItem(unsigned int outt, char *item, char *data, char *configfile)
@@ -217,47 +220,5 @@ extern "C"
 		winampwnd = hwnd;
 	}
 };
-
-static void tta_error_message(int error, const wchar_t *filename)
-{
-	wchar_t message[MAX_MESSAGE_LENGTH];
-
-	std::wstring name(filename);
-	switch (error) {
-	case TTA_OPEN_ERROR:
-		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Can't open file:\n%ls", name.c_str());
-		break;
-	case TTA_FORMAT_ERROR:
-		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Unknown TTA format version:\n%ls", name.c_str());
-		break;
-	case TTA_NOT_SUPPORTED:
-		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Not supported file format:\n%ls", name.c_str());
-		break;
-	case TTA_FILE_ERROR:
-		PrintfCch(message, MAX_MESSAGE_LENGTH, L"File is corrupted:\n%ls", name.c_str());
-		break;
-	case TTA_READ_ERROR:
-		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Can't read from file:\n%ls", name.c_str());
-		break;
-	case TTA_WRITE_ERROR:
-		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Can't write to file:\n%ls", name.c_str());
-		break;
-	case TTA_MEMORY_ERROR:
-		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Insufficient memory available");
-		break;
-	case TTA_SEEK_ERROR:
-		PrintfCch(message, MAX_MESSAGE_LENGTH, L"file seek error");
-		break;
-	case TTA_PASSWORD_ERROR:
-		PrintfCch(message, MAX_MESSAGE_LENGTH, L"password protected file");
-		break;
-	default:
-		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Unknown TTA decoder error");
-		break;
-	}
-
-	MessageBox(winampwnd, message, L"TTA Decoder Error",
-						  MB_ICONERROR | MB_SYSTEMMODAL);
-}
 
 RUNTIME_LEN_HELPER_HANDLER

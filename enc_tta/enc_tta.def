@@ -5,7 +5,9 @@ SetWinampHWND @1
 GetAudioTypes3 @2
 CreateAudio3 @3
 FinishAudio3 @4
-PrepareToFinish @5
-ConfigAudio3 @6
-GetConfigItem @7
-SetConfigItem @8
+FinishAudio3W @5
+PrepareToFinish @6
+PrepareToFinishW @7
+ConfigAudio3 @8
+GetConfigItem @9
+SetConfigItem @10
