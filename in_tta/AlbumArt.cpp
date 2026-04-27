@@ -21,9 +21,9 @@ If not, see <https://www.gnu.org/licenses/>.
 #include <Wasabi/api/service/api_service.h>
 #include <Agave/Config/api_config.h>
 #include <Wasabi/api/memmgr/api_memmgr.h>
-#include <Winamp/in2.h>
-#include <Winamp/wa_ipc.h>
-#include <nu/servicebuilder.h>
+#include <winamp/in2.h>
+#include <winamp/wa_ipc.h>
+#include <nu/ServiceBuilder.h>
 #include <Wasabi/api/service/waservicefactory.h>
 #include <Agave/AlbumArt/svc_albumArtProvider.h>
 #include "AlbumArt.h"
@@ -34,8 +34,6 @@ If not, see <https://www.gnu.org/licenses/>.
 #include <loader/loader/utils.h>
 
 #include "MediaLibrary.h"
-
-static const int MIME_LENGTH = 64;
 
 class AlbumArtFactory : public waServiceFactory
 {
@@ -224,8 +222,6 @@ int TTA_AlbumArtProvider::SetAlbumArtData(const wchar_t *filename, const wchar_t
 		return retval;
 	}
 
-	size_t convertedChars = 0;
-
 	TagLib::ByteVector AlbumArt;
 
 	if (!bits)
@@ -245,7 +241,7 @@ int TTA_AlbumArtProvider::SetAlbumArtData(const wchar_t *filename, const wchar_t
 		mimeType += mime_type;
 		size = (int)len;
 		artType = TagLib::ID3v2::AttachedPictureFrame::FrontCover;
-		AlbumArt.setData((const char *)bits, (TagLib::uint)size);
+		AlbumArt.setData((const char *)bits, (unsigned int)size);
 	}
 
 	TagLib::TrueAudio::File TTAFile(filename);

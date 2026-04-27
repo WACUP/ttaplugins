@@ -50,8 +50,8 @@ TTAint64 CALLBACK seek_callback(TTA_io_callback *io, TTAint64 offset)
 	return ::SetFilePointer(iocb->handle, (LONG)offset, NULL, FILE_BEGIN);
 } // seek_callback
 
-CDecodeFile::CDecodeFile(void) : paused(0), seek_needed(1), decode_pos_ms(0), bitrate(0), Filesize(0),
-st_state(0), decoderFileHANDLE(INVALID_HANDLE_VALUE), TTA(NULL), signature(sig_number)
+CDecodeFile::CDecodeFile(void) : paused(0), seek_needed(1), decode_pos_ms(0), pos(0), bitrate(0), Filesize(0),
+						st_state(0), decoderFileHANDLE(INVALID_HANDLE_VALUE), TTA(NULL), signature(sig_number)
 {
 	iocb_wrapper.handle = INVALID_HANDLE_VALUE;
 	iocb_wrapper.iocb.read = NULL;

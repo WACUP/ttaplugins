@@ -141,52 +141,56 @@ bool CMediaLibrary::GetTagInfo(const std::wstring fn)
 		TagDataW.Format = ttainfo_temp.str();
 
 		std::wstring temp;
-		if (NULL != TTAFile.ID3v2Tag())
+		auto id3v2tag = TTAFile.ID3v2Tag();
+		if (NULL != id3v2tag)
 		{
-			temp = TTAFile.ID3v2Tag()->title().toCWString();
+			temp = id3v2tag->title().toCWString();
 			TagDataW.Title = temp;
-			temp = TTAFile.ID3v2Tag()->artist().toCWString();
+			temp = id3v2tag->artist().toCWString();
 			TagDataW.Artist = temp;
-			temp = TTAFile.ID3v2Tag()->albumArtist().toCWString();
+			temp = id3v2tag->getTextFrame("TPE2").toCWString();
 			TagDataW.AlbumArtist = temp;
-			temp = TTAFile.ID3v2Tag()->comment().toCWString();
+			temp = id3v2tag->comment().toCWString();
 			TagDataW.Comment = temp;
-			temp = TTAFile.ID3v2Tag()->album().toCWString();
+			temp = id3v2tag->album().toCWString();
 			TagDataW.Album = temp;
-			temp = TTAFile.ID3v2Tag()->stringYear().toCWString();
+			temp = id3v2tag->getTextFrame("TDRC").toCWString();
 			TagDataW.Year = temp;
-			temp = TTAFile.ID3v2Tag()->genre().toCWString();
+			temp = id3v2tag->genre().toCWString();
 			TagDataW.Genre = temp;
-			temp = TTAFile.ID3v2Tag()->stringTrack().toCWString();
+			temp = id3v2tag->getTextFrame("TRCK").toCWString();
 			TagDataW.Track = temp;
-			temp = TTAFile.ID3v2Tag()->composers().toCWString();
+			temp = id3v2tag->getTextFrame("TCOM").toCWString();
 			TagDataW.Composer = temp;
-			temp = TTAFile.ID3v2Tag()->publisher().toCWString();
+			temp = id3v2tag->getTextFrame("TPUB").toCWString();
 			TagDataW.Publisher = temp;
-			temp = TTAFile.ID3v2Tag()->disc().toCWString();
+			temp = id3v2tag->getTextFrame("TPOS").toCWString();
 			TagDataW.Disc = temp;
-			temp = TTAFile.ID3v2Tag()->BPM().toCWString();
+			temp = id3v2tag->getTextFrame("TBPM").toCWString();
 			TagDataW.BPM = temp;
 		}
-		else if (NULL != TTAFile.ID3v1Tag())
+		else
 		{
-			std::wstringstream temp_year;
-			std::wstringstream temp_track;
-			temp = TTAFile.ID3v1Tag()->title().toCWString();
-			TagDataW.Title = temp;
-			temp = TTAFile.ID3v1Tag()->artist().toCWString();
-			TagDataW.Artist = temp;
-			temp = TTAFile.ID3v1Tag()->comment().toCWString();
-			TagDataW.Comment = temp;
-			temp = TTAFile.ID3v1Tag()->album().toCWString();
-			TagDataW.Album = temp;
-			temp_year << TTAFile.ID3v1Tag()->year();
-			TagDataW.Year = temp_year.str();
-			temp = TTAFile.ID3v1Tag()->genre().toCWString();
-			TagDataW.Genre = temp;
-			temp_track << TTAFile.ID3v1Tag()->track();
-			TagDataW.Track = temp_track.str();
-
+			auto id3v1tag = TTAFile.ID3v1Tag();
+			if (NULL != id3v1tag)
+			{
+				std::wstringstream temp_year;
+				std::wstringstream temp_track;
+				temp = id3v1tag->title().toCWString();
+				TagDataW.Title = temp;
+				temp = id3v1tag->artist().toCWString();
+				TagDataW.Artist = temp;
+				temp = id3v1tag->comment().toCWString();
+				TagDataW.Comment = temp;
+				temp = id3v1tag->album().toCWString();
+				TagDataW.Album = temp;
+				temp_year << id3v1tag->year();
+				TagDataW.Year = temp_year.str();
+				temp = id3v1tag->genre().toCWString();
+				TagDataW.Genre = temp;
+				temp_track << id3v1tag->track();
+				TagDataW.Track = temp_track.str();
+			}
 		}
 	}
 
@@ -474,44 +478,48 @@ int CMediaLibrary::WriteExtendedFileInfo()
 			return 0;
 		}
 
-		if (NULL != TTAFile.ID3v2Tag(true))
+		auto id3v2tag = TTAFile.ID3v2Tag(true);
+		if (NULL != id3v2tag)
 		{
 			TagLib::String temp;
 			temp = TagLib::String(TagDataW.Title);
-			TTAFile.ID3v2Tag()->setTitle(temp);
+			id3v2tag->setTitle(temp);
 			temp = TagLib::String(TagDataW.Artist);
-			TTAFile.ID3v2Tag()->setArtist(temp);
+			id3v2tag->setArtist(temp);
 			temp = TagLib::String(TagDataW.AlbumArtist);
-			TTAFile.ID3v2Tag()->setAlbumArtist(temp);
+			id3v2tag->setTextFrame("TPE2", temp);
 			temp = TagLib::String(TagDataW.Comment);
-			TTAFile.ID3v2Tag()->setComment(temp);
+			id3v2tag->setComment(temp);
 			temp = TagLib::String(TagDataW.Album);
-			TTAFile.ID3v2Tag()->setAlbum(temp);
+			id3v2tag->setAlbum(temp);
 			temp = TagLib::String(TagDataW.Year);
-			TTAFile.ID3v2Tag()->setStringYear(temp);
+			id3v2tag->setTextFrame("TDRC", temp);
 			temp = TagLib::String(TagDataW.Genre);
-			TTAFile.ID3v2Tag()->setGenre(temp);
+			id3v2tag->setGenre(temp);
 			temp = TagLib::String(TagDataW.Track);
-			TTAFile.ID3v2Tag()->setStringTrack(temp);
+			id3v2tag->setTextFrame("TRCK", temp);
 			temp = TagLib::String(TagDataW.Composer);
-			TTAFile.ID3v2Tag()->setComposers(temp);
+			id3v2tag->setTextFrame("TCOM", temp);
 			temp = TagLib::String(TagDataW.Publisher);
-			TTAFile.ID3v2Tag()->setPublisher(temp);
+			id3v2tag->setTextFrame("TPUB", temp);
 			temp = TagLib::String(TagDataW.Disc);
-			TTAFile.ID3v2Tag()->setDisc(temp);
+			id3v2tag->setTextFrame("TPOS", temp);
 			temp = TagLib::String(TagDataW.BPM);
-			TTAFile.ID3v2Tag()->setBPM(temp);
-
+			id3v2tag->setTextFrame("TBPM", temp);
 		}
-		else if (NULL != TTAFile.ID3v1Tag(true))
+		else
 		{
-			TTAFile.ID3v1Tag()->setTitle(TagDataW.Title);
-			TTAFile.ID3v1Tag()->setArtist(TagDataW.Artist);
-			TTAFile.ID3v1Tag()->setAlbum(TagDataW.Album);
-			TTAFile.ID3v1Tag()->setComment(TagDataW.Comment);
-			TTAFile.ID3v1Tag()->setYear(WStr2I(TagDataW.Year.c_str()));
-			TTAFile.ID3v1Tag()->setTrack(WStr2I(TagDataW.Track.c_str()));
-			TTAFile.ID3v1Tag()->setGenre(TagDataW.Genre);
+			auto id3v1tag = TTAFile.ID3v1Tag(true);
+			if (NULL != id3v1tag)
+			{
+				id3v1tag->setTitle(TagDataW.Title);
+				id3v1tag->setArtist(TagDataW.Artist);
+				id3v1tag->setAlbum(TagDataW.Album);
+				id3v1tag->setComment(TagDataW.Comment);
+				id3v1tag->setYear(WStr2I(TagDataW.Year.c_str()));
+				id3v1tag->setTrack(WStr2I(TagDataW.Track.c_str()));
+				id3v1tag->setGenre(TagDataW.Genre);
+			}
 		}
 
 		TTAFile.save();

@@ -36,7 +36,7 @@
 #include "AlbumArt.h"
 #include "MediaLibrary.h"
 
-#include <Winamp/in2.h>
+#include <winamp/in2.h>
 #include <Agave/Language/api_language.h>
 #include <Agave/Config/api_config.h>
 
@@ -54,7 +54,6 @@
 
 const static int MAX_MESSAGE_LENGTH = 1024;
 const static __int32 PLAYING_BUFFER_LENGTH = 576;
-const static __int32 TRANSCODING_BUFFER_LENGTH = 5120;
 
 // for playing static variables
 static /*__declspec(align(16))*/ CDecodeFile* playing_ttafile;
@@ -597,6 +596,7 @@ extern "C"
 		CDecodeFile *dec = new CDecodeFile();
 		if (!dec->isValid())
 		{
+			delete dec;
 			return (intptr_t)0;
 		}
 
@@ -633,8 +633,6 @@ extern "C"
 	__declspec(dllexport) intptr_t __cdecl winampGetExtendedRead_getData(intptr_t handle, char *dest, int len, int *killswitch)
 	{
 		CDecodeFile *dec = (CDecodeFile *)handle;
-		int dest_used = 0;
-		int n = 0;
 		int32_t decoded_samples = 0;
 		int32_t decoded_bytes = 0;
 
@@ -650,7 +648,6 @@ extern "C"
 		catch (CDecodeFile_exception &ex)
 		{
 			tta_error_message(ex.code(), dec->GetFileName());
-			dest_used = -1;
 		}
 
 		if (0 != decoded_samples)
