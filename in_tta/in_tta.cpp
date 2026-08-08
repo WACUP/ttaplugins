@@ -31,7 +31,6 @@
 
 #include <Shlwapi.h>
 #include <type_traits>
-#include <strsafe.h>
 
 #include "AlbumArt.h"
 #include "MediaLibrary.h"
@@ -50,6 +49,7 @@
 #include <loader/loader/utils.h>
 #include <loader/loader/delay_load_helper.h>
 #include <loader/loader/runtime_helper.h>
+#include <loader/hook/lock.h>
 #include <loader/hook/squash.h>
 
 const static int MAX_MESSAGE_LENGTH = 1024;
@@ -61,6 +61,7 @@ static /*__declspec(align(16))*/ CDecodeFile* playing_ttafile;
 static HANDLE decoder_handle = INVALID_HANDLE_VALUE;
 static DWORD WINAPI __stdcall DecoderThread(void *p);
 static volatile int killDecoderThread = 0;
+static CRITICAL_SECTION g_info_cs;
 
 // for MetaData static variables
 CMediaLibrary *m_ReadTag = NULL;
@@ -142,34 +143,34 @@ static void tta_error_message(int error, const wchar_t *filename)
 	switch (error)
 	{
 	case TTA_OPEN_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Can't open file:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Can't open file:\n%ls", name.c_str());
 		break;
 	case TTA_FORMAT_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Unknown TTA format version:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Unknown TTA format version:\n%ls", name.c_str());
 		break;
 	case TTA_NOT_SUPPORTED:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Not supported file format:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Not supported file format:\n%ls", name.c_str());
 		break;
 	case TTA_FILE_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"File is corrupted:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"File is corrupted:\n%ls", name.c_str());
 		break;
 	case TTA_READ_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Can't read from file:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Can't read from file:\n%ls", name.c_str());
 		break;
 	case TTA_WRITE_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Can't write to file:\n%ls", name.c_str());
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Can't write to file:\n%ls", name.c_str());
 		break;
 	case TTA_MEMORY_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Insufficient memory available");
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Insufficient memory available");
 		break;
 	case TTA_SEEK_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"file seek error");
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"file seek error");
 		break;
 	case TTA_PASSWORD_ERROR:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"password protected file");
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"password protected file");
 		break;
 	default:
-		StringCbPrintf(message, MAX_MESSAGE_LENGTH, L"Unknown TTA decoder error");
+		PrintfCch(message, MAX_MESSAGE_LENGTH, L"Unknown TTA decoder error");
 		break;
 	}
 
@@ -192,15 +193,20 @@ void about(HWND hwndParent)
 
 int init(void)
 {
+	InitializeCriticalSectionEx(&g_info_cs, 400, CRITICAL_SECTION_NO_DEBUG_INFO);
+
 	Wasabi_Init();
 	// TODO localise
 	plugin.description = (char *)TEXT("True Audio Decoder " PLUGIN_VERSION_CHAR);
+
 	return IN_INIT_SUCCESS;
 }
 
 void quit(void)
 {
 	Wasabi_Quit();
+
+	DeleteCriticalSection(&g_info_cs);
 }
 
 void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms)
@@ -521,6 +527,8 @@ extern "C"
 	__declspec(dllexport) int __cdecl
 		winampGetExtendedFileInfoW(const wchar_t *fn, const char *data, wchar_t *dest, const size_t destlen)
 	{
+		const LockGuard lock(g_info_cs);
+
 		if (m_ReadTag == NULL)
 		{
 			if (!SameStrA(data, "reset"))
@@ -690,6 +698,6 @@ extern "C"
 	}
 }
 
-DLL_DELAY_LOAD_HANDLER
+DLL_DELAY_LOAD_HANDLER_OVERRIDE
 
 RUNTIME_HELPER_HANDLER

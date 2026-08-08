@@ -26,8 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <taglib/mpeg/id3v1/id3v1tag.h>
 #include <sstream>
 #include <iomanip>
-#include <strsafe.h>
 #include <loader/loader/utils.h>
+#include <loader/hook/lock.h>
 
 //////////////////////////////////////////////////////////////////////
 // Create / Destroy
@@ -228,23 +228,21 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 	}
 	else if (SameStrA(Metadata, "reset"))
 	{
+		const TryLockGuard lock(CriticalSection);
+
 		// this might sometimes mess up so we'll see if what's
 		// being requested is a reset & if it is then we'll do
 		// a check to see if something else has the lock to do
 		// a quick bail to try to avoid a hang related failure
-		if (!::TryEnterCriticalSection(&CriticalSection))
+		if (lock)
 		{
-			return 0;
+			FileName = L"";
+			FlushCache(true);
 		}
-
-		FileName = L"";
-		FlushCache(true);
-
-		::LeaveCriticalSection(&CriticalSection);
 		return 0;
 	}
 
-	::EnterCriticalSection(&CriticalSection);
+	const LockGuard lock(CriticalSection);
 
 	bool FindTag;
 	if (std::wstring(fn) != FileName)
@@ -359,16 +357,15 @@ int CMediaLibrary::GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 		RetCode = 0;
 	}
 
-	::LeaveCriticalSection(&CriticalSection);
 	return RetCode;
 }
 
 int CMediaLibrary::SetExtendedFileInfo(const wchar_t *fn, const char *Metadata, const wchar_t *val)
 {
+	const LockGuard lock(CriticalSection);
+
 	bool FindTag = false;
 	int RetCode = 0;
-
-	::EnterCriticalSection(&CriticalSection);
 
 	if (std::wstring(fn) != FileName)
 	{
@@ -455,17 +452,15 @@ int CMediaLibrary::SetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 		RetCode = 0;
 	}
 
-	::LeaveCriticalSection(&CriticalSection);
 	return RetCode;
 }
 
 int CMediaLibrary::WriteExtendedFileInfo()
 {
-	::EnterCriticalSection(&CriticalSection);
+	const LockGuard lock(CriticalSection);
 
 	if (FileName.empty())
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		return 0;
 	}
 	else
@@ -474,7 +469,6 @@ int CMediaLibrary::WriteExtendedFileInfo()
 
 		if (!TTAFile.isValid())
 		{
-			::LeaveCriticalSection(&CriticalSection);
 			return 0;
 		}
 
@@ -524,8 +518,6 @@ int CMediaLibrary::WriteExtendedFileInfo()
 
 		TTAFile.save();
 	}
-
-	::LeaveCriticalSection(&CriticalSection);
 
 	return 1;
 }

@@ -32,6 +32,7 @@ If not, see <https://www.gnu.org/licenses/>.
 #include <taglib/mpeg/id3v2/frames/attachedpictureframe.h>
 #include <loader/loader/paths.h>
 #include <loader/loader/utils.h>
+#include <loader/hook/lock.h>
 
 #include "MediaLibrary.h"
 
@@ -104,19 +105,17 @@ int TTA_AlbumArtProvider::ProviderType(void)
 
 int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t *type, void **bits, size_t *len, wchar_t **mime_type)
 {
-	int retval = ALBUMARTPROVIDER_FAILURE;
+	const LockGuard lock(CriticalSection);
 
-	::EnterCriticalSection(&CriticalSection);
+	int retval = ALBUMARTPROVIDER_FAILURE;
 
 	if (!SameStr(type, L"cover"))
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		return retval;
 	}
 
 	if (!bits || !len || !mime_type)
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		return retval;
 	}
 
@@ -132,7 +131,6 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 		if (!TagFile.isValid())
 		{
 			isSucceed = false;
-			::LeaveCriticalSection(&CriticalSection);
 			return retval;
 		}
 		else
@@ -161,14 +159,12 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 		*bits = (char *)SafeMalloc(*len);
 		if (NULL == *bits)
 		{
-			::LeaveCriticalSection(&CriticalSection);
 			return retval;
 		}
 
 		errno_t err = memcpy_s(*bits, AlbumArt.size(), AlbumArt.data(), AlbumArt.size());
 		if (err)
 		{
-			::LeaveCriticalSection(&CriticalSection);
 			return retval;
 		}
 
@@ -179,7 +175,6 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 			{
 				SafeFree(*bits);
 			}
-			::LeaveCriticalSection(&CriticalSection);
 			return retval;
 		}
 		else
@@ -203,22 +198,20 @@ int TTA_AlbumArtProvider::GetAlbumArtData(const wchar_t *filename, const wchar_t
 		}
 	}
 
-	::LeaveCriticalSection(&CriticalSection);
 	return retval;
 }
 
 int TTA_AlbumArtProvider::SetAlbumArtData(const wchar_t *filename, const wchar_t *type, void *bits, size_t len, const wchar_t *mime_type)
 {
+	const LockGuard lock(CriticalSection);
+
 	int retval = ALBUMARTPROVIDER_FAILURE;
 	TagLib::String mimeType(L"");
 	int size = 0;
 	TagLib::ID3v2::AttachedPictureFrame::Type artType = TagLib::ID3v2::AttachedPictureFrame::Other;
 
-	::EnterCriticalSection(&CriticalSection);
-
 	if (std::wstring(filename) == L"")
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		return retval;
 	}
 
@@ -232,7 +225,6 @@ int TTA_AlbumArtProvider::SetAlbumArtData(const wchar_t *filename, const wchar_t
 	}
 	else if (len == 0 || wcscmp(mime_type, L"") == 0)
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		return retval;
 	}
 	else
@@ -253,8 +245,6 @@ int TTA_AlbumArtProvider::SetAlbumArtData(const wchar_t *filename, const wchar_t
 		isSucceed = false;
 		retval = ALBUMARTPROVIDER_SUCCESS;
 	}
-
-	::LeaveCriticalSection(&CriticalSection);
 
 	return retval;
 }

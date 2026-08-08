@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "DecodeFile.h"
 #include "libtta.h"
+#include <loader/hook/lock.h>
 
 TTAint32 CALLBACK read_callback(TTA_io_callback *io, TTAuint8 *buffer, TTAuint32 size)
 {
@@ -63,7 +64,7 @@ CDecodeFile::CDecodeFile(void) : paused(0), seek_needed(1), decode_pos_ms(0), po
 
 CDecodeFile::~CDecodeFile(void)
 {
-	::EnterCriticalSection(&CriticalSection);
+	const LockGuard lock(CriticalSection);
 
 	if (INVALID_HANDLE_VALUE != decoderFileHANDLE)
 	{
@@ -91,29 +92,24 @@ CDecodeFile::~CDecodeFile(void)
 		TTA = NULL;
 	}
 
-	::LeaveCriticalSection(&CriticalSection);
-
 	::DeleteCriticalSection(&CriticalSection);
 }
 
 int CDecodeFile::SetFileName(const wchar_t *filename)
 {
-	::EnterCriticalSection(&CriticalSection);
+	const LockGuard lock(CriticalSection);
 
 	// check for required data presented
 	if (!filename)
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		throw CDecodeFile_exception(TTA_OPEN_ERROR);
 	}
-
 
 	FileName = filename;
 	decoderFileHANDLE = CreateFileW(FileName.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (decoderFileHANDLE == INVALID_HANDLE_VALUE || decoderFileHANDLE == NULL)
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		throw CDecodeFile_exception(TTA_OPEN_ERROR);
 	}
 
@@ -147,7 +143,6 @@ int CDecodeFile::SetFileName(const wchar_t *filename)
 
 		::CloseHandle(decoderFileHANDLE);
 		decoderFileHANDLE = INVALID_HANDLE_VALUE;
-		::LeaveCriticalSection(&CriticalSection);
 		throw CDecodeFile_exception(ex.code());
 	}
 
@@ -168,15 +163,12 @@ int CDecodeFile::SetFileName(const wchar_t *filename)
 		st_state = 0;
 	}
 
-	::LeaveCriticalSection(&CriticalSection);
-
 	return TTA_NO_ERROR;
 }
 
 long double CDecodeFile::SeekPosition(int *done)
 {
-
-	::EnterCriticalSection(&CriticalSection);
+	const LockGuard lock(CriticalSection);
 
 	TTAuint32 new_pos;
 
@@ -193,7 +185,6 @@ long double CDecodeFile::SeekPosition(int *done)
 
 	if (NULL == TTA)
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		return (double)0;
 	}
 
@@ -204,11 +195,8 @@ long double CDecodeFile::SeekPosition(int *done)
 
 	catch (tta::tta_exception &ex)
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		throw CDecodeFile_exception(ex.code());
 	}
-
-	::LeaveCriticalSection(&CriticalSection);
 
 	return decode_pos_ms;
 }
@@ -223,11 +211,10 @@ int  CDecodeFile::GetSamples(BYTE *buffer, TTAuint32 buffersize)
 		return 0; // no decode data
 	}
 
-	::EnterCriticalSection(&CriticalSection);
+	const LockGuard lock(CriticalSection);
 
 	if (NULL == TTA)
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		throw CDecodeFile_exception(TTA_MEMORY_ERROR);
 	}
 
@@ -238,7 +225,6 @@ int  CDecodeFile::GetSamples(BYTE *buffer, TTAuint32 buffersize)
 
 	catch (tta::tta_exception &ex)
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		throw CDecodeFile_exception(ex.code());
 	}
 
@@ -247,19 +233,16 @@ int  CDecodeFile::GetSamples(BYTE *buffer, TTAuint32 buffersize)
 		decode_pos_ms += (__int32)(len * 1000. / tta_info.sps);
 	}
 
-	::LeaveCriticalSection(&CriticalSection);
-
 	return len;
 
 }
 
 void CDecodeFile::SetOutputBPS(unsigned long bps)
 {
-	::EnterCriticalSection(&CriticalSection);
+	const LockGuard lock(CriticalSection);
 
 	if (NULL == TTA)
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		throw CDecodeFile_exception(TTA_MEMORY_ERROR);
 	}
 
@@ -271,9 +254,6 @@ void CDecodeFile::SetOutputBPS(unsigned long bps)
 
 	catch (tta::tta_exception &ex)
 	{
-		::LeaveCriticalSection(&CriticalSection);
 		throw CDecodeFile_exception(ex.code());
 	}
-
-	::LeaveCriticalSection(&CriticalSection);
 }

@@ -1,20 +1,21 @@
 /*
 The ttaplugins-winamp project.
-Copyright (C) 2005-2025 Yamagata Fumihiro
+Copyright (C) 2005-2026 Yamagata Fumihiro
 
-This library is free software; you can redistribute it and/or
+This file is part of ttaplugins-winamp.
+
+enc_tta is free software: you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or any later version.
+License as published by the Free Software Foundation, either
+version 3 of the License, or any later version.
 
-This library is distributed in the hope that it will be useful,
+enc_tta is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+You should have received a copy of the GNU General Public License along with ttaplugins-winamp.
+If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef VERSIONNO_H
@@ -25,10 +26,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */MAJOR_VERSION 4
 #define /*
 !define /**/ /*\
-*/MINOR_VERSION 01
+*/MINOR_VERSION 02
 #define /*
 !define /**/ /*\
-*/EXTENDED_VERSION 26
+*/EXTENDED_VERSION 27
 
 
 #ifndef MAKESTR
@@ -58,9 +59,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define COPYRIGHT_ENC_TTA    BASE_VERSION_CHAR " (C)" COPYRIGHT_YEARS " Yamagata Fumihiro. All right reserved."
 #define PLUGIN_VERSION_CHAR VERSION_CHAR
 #define PLUGIN_VERSION_WCHAR VERSION_WCHAR
-#define LIBTTA_VERSION_WCHAR L"libtta C++ Ver.2.3"
+#define LIBTTA_VERSION_CHAR "libtta v2.3"
+#define ENC_TTA_VERSION_CHAR VERSION_CHAR " (" LIBTTA_VERSION_CHAR ")"
+#define LIBTTA_VERSION_WCHAR L"libtta v2.3"
 
-#define PROJECT_URL_WCHAR L"<https://github.com/bunbun042000/ttaplugin-winamp>"
+#define PROJECT_URL_WCHAR L"<https://github.com/bunbun042000/ttaplugins-winamp>"
 #define ORIGINAL_CREADIT01 L"Plugin is written by Alexander Djourik, Pavel Zhilin and Anton Gorbunov.\n"
 #define ORIGINAL_CREADIT02 L"Copyright (c) 2003 Alexander Djourik.\n"
 #define ORIGINAL_CREADIT03 L"All rights reserved.\n"

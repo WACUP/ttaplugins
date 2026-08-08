@@ -1,19 +1,36 @@
-ttaplugins-winamp v3.72
+ttaplugins-winamp v4.02
 =====================================================
 
 *This plugin 
 is based on TAU Software(http://en.true-audio.com/)
 TTA plug-in ver 3.5 for Winamp 2,5.
-The modification is ID3v2 Tag read/write function using 
+Add read/write metadata (include album art) for MediaLibray using
 taglib(https://github.com/taglib/taglib).
-And add read metadata (include album art) for MediaLibray.
 Additionally, tta encode plugin is included.
-This plugin performs Winamp Ver.2.9 or newer and tested on Winamp Ver.5.9.1.
+This plugin performs Winamp Ver.5.66 or newer and tested on Winamp Ver.5.9.2.
 
 *Install
- Please copy in_tta.dll and enc_tta.dll to Plugins folder in Winamp.
+ Please copy in_tta.dll and enc_tta.dll to Plugins folder and libtta.dll to Shared folder in Winamp.
 
 *Release Notes
+2026-08-08 4.02       Change taglib master(based on 2026/08/07 21:54:50 Commit hash:2a5fc12b6860649362dab7813374febf7004c513)(in_tta.dll).
+                      Change from stack to heap on FinishAudio() (enc_tta.dll).
+                      Change compiler to Visual Studio 2026(Version 18.8.2)(in_tta.dll, enc_tta.dll).
+                      Fix word in license(in_tta.dll, enc_tta.dll, libtta.dll).
+2025-01-07 4.01       Fix unnecessary skip writing on seek table(libtta.dll).
+2026-01-01 4.00       Change software license from LGPL2.1 to LGPL3(in_tta.dll, enc_tta.dll, libtta.dll).
+                      Use original taglib library and implement additional function internally(in_tta.dll).
+                      Change encode engine from internal to libtta-cpp-2.3 based shared library (DLL)(enc_tta.dll).
+                      Change libtta-cpp from static library to shared library (DLL)(in_tta.dll). 
+                      Commonly use DLL libtta-cpp both in_tta and enc_tta(in_tta.dll, enc_tta.dll).
+                      Change taglib master(2025/11/24 21:57:09 Commit hash:9c042984d26af605a6fd1dac7f12bda05219fee7)(in_tta.dll).
+                      Update NSIS script about download/install VC redistributable.
+2025-12-19 3.74       Fix FileName variable doesn't hold the filename if valid tag is read in GetTagInfo()(in_tta.dll).
+                      Fix argument type of metadata from const wchar_t* to const char* on winampSetExtendedFileInfoW() and winampGetExtendedFileInfoW()(in_tta.dll).
+                      Change compiler to Visual Studio 2026 (Version 18.1.1)(in_tta.dll, enc_tta.dll)
+2025-11-27 3.73       Change upstream tablib master (based on 2025/11/24 21:57:09 Commit hash:9c042984d26af605a6fd1dac7f12bda05219fee7)(in_tta.dll)
+                      Change compiler to Visual Studio 2026 (Version 18.0.2)(in_tta.dll, enc_tta.dll)
+                      Change zlib from Version 1.2.11 to Version 1.3.1(in_tta.dll, enc_tta.dll)
 2025-10-28 3.72       Change upstream tablib master (based on 2025/10/25 20:00:24 Commit hash:49be371caab517a6e2c35a6038b8eeb12c9b82ae)(in_tta.dll)
                       Change compiler to Visual Studio 2022 (Version 17.14.18)(in_tta.dll, enc_tta.dll)
 2025-06-18 3.71       Change upstream tablib master (based on 2025/06/14 15:53:30 Commit hash:6563ceaafadf6b2f1997e5582a6bd57cc7b80a57)(in_tta.dll)
@@ -145,7 +162,7 @@ This plugin performs Winamp Ver.2.9 or newer and tested on Winamp Ver.5.9.1.
 2005/12/14 3.2 Beta2  Initial release
 
 *Copying
-This libray is distributed under LGPL2.1
+This libray is distributed under LGPL3.
 
 *Acknowledgement
 

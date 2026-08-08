@@ -1,19 +1,37 @@
-﻿ttaplugins-winamp v3.72
+﻿ttaplugins-winamp v4.02
 =====================================================
 
 *このプラグインは
 本家(http://www.true-audio.com/)配布のwinamp用プラグインver3.5に
-taglib(https://github.com/taglib/taglib)をベースとした
-メディアライブラリ読み込み対応を付け加え、ID3v2周りを改変したものです。
+taglib(https://github.com/taglib/taglib)を用いた
+メディアライブラリ読み込み対応を付け加えたものです。
 またアルバムアートなどメディアライブラリのメタデータ読み込み機能を付加しました。
 新たにttaファイルへのエンコードプラグインも同梱しています。
-Winamp Ver.2.9以降に対応しており，Winamp Ver.5.9.1にて動作確認しています。
+Winamp Ver.5.66以降に対応しており，Winamp Ver.5.9.2にて動作確認しています。
 
 
 *インストール方法
- WinampのフォルダにあるPluginsフォルダにin_tta.dllとenc_tta.dllをコピーしてください。
+ WinampのフォルダにあるPluginsフォルダにin_tta.dllとenc_tta.dllを，Sharedフォルダにlibtta.dllをコピーしてください。
 
 *更新履歴
+2026-08-08 4.02       taglibを最新master(based on 2026/08/07 21:54:50 Commit hash:2a5fc12b6860649362dab7813374febf7004c513)に変更(in_tta.dll)
+                      スタックをヒープに変更(enc_tta.dll)
+                      コンパイラをVisual Studio 2026(バージョン 18.8.2)に変更(in_tta.dll, enc_tta.dll)
+                      ライセンス文言を修正(in_tta.dll, enc_tta.dll, libtta.dll).
+2025-01-07 4.01       不必要なシークテーブルの書き飛ばしを修正(libtta.dll)
+2025-01-01 4.00       ソフトウエアライセンスをLGPL2.1からLGPL3に変更(in_tta.dll, enc_tta.dll, libtta.dll)
+                      taglibをオリジナルのものを用いる事にし，必要な変更を内部で実装する形に変更(in_tta.dll).
+                      エンコードエンジンを内部実装からlibtta-cpp-2.3ベースのDLLを用いる形に変更(enc_tta.dll).
+                      libtta-cpp を静的リンクからDLLを用いる形に変更(libtta.dll). 
+                      libtta.dllをin_ttaとenc_tta共通で用いる形に変更(in_tta.dll, enc_tta.dll).
+                      taglibを最新master(based on 2025/11/24 21:57:09 Commit hash:9c042984d26af605a6fd1dac7f12bda05219fee7)に変更(in_tta.dll)
+                      NSIS scriptのVCランタイムダウンロード元を変更.
+2025-12-19 3.74       正しくタグが読み込まれたにもかかわらず，ファイル名を保持していなかったため再度タグを読みこむ不具合を修正(in_tta.dll)
+                      winampSetExtendedFileInfoW()とwinampGetExtendedFileInfoW()のメタデータ引数の型をconst wchar_t* から const char* へと修正(in_tta.dll).
+                      コンパイラをVisual Studio 2026(バージョン 18.1.1)に変更(in_tta.dll, enc_tta.dll)
+2025-11-27 3.73       taglibを最新master(based on 2025/11/24 21:57:09 Commit hash:9c042984d26af605a6fd1dac7f12bda05219fee7)ベースに変更(in_tta.dll)
+                      コンパイラをVisual Studio 2026(バージョン 18.0.2)に変更(in_tta.dll, enc_tta.dll)
+                      zlibを1.2.11から1.3.1に変更(in_tta.dll, enc_tta.dll)
 2025-10-28 3.72       taglibを最新master(based on 2025/10/25 20:00:24 Commit hash:49be371caab517a6e2c35a6038b8eeb12c9b82ae)ベースに変更(in_tta.dll)
                       コンパイラをVisual Studio 2022(バージョン 17.14.18)に変更(in_tta.dll, enc_tta.dll)
 2025-06-18 3.71       taglibを最新master(based on 2025/06/14 15:53:30 Commit hash:6563ceaafadf6b2f1997e5582a6bd57cc7b80a57)ベースに変更(in_tta.dll)
@@ -144,7 +162,7 @@ Winamp Ver.2.9以降に対応しており，Winamp Ver.5.9.1にて動作確認�
 2005/12/14 3.2 Beta2
 
 *配布
-配布規定はLGPL2.1に従います。
+配布規定はLGPL3に従います。
 
 *その他
 この改変は私が勝手に行ったものであり、この改変版に関して
