@@ -73,17 +73,25 @@ void quit(void);
 void getfileinfo(const wchar_t *file, wchar_t *title, int *length_in_ms);
 /*int  infodlg(const wchar_t *file, HWND hwndParent);
 int  isourfile(const wchar_t *fn);*/
-int  play(const wchar_t *fn);
+#ifndef _WIN64
+int  play(const wchar_t* fn);
 void pause(void);
 void unpause(void);
+#else
+int  play(const wchar_t* fn, const int seek_offset);
+void setpause(const int paused);
+#endif
 int  ispaused(void);
 void stop(void);
 int  getlength(void);
 int  getoutputtime(void);
-void setoutputtime(int time_in_ms);
-void setvolume(int volume);
-void setpan(int pan);
+void setoutputtime(const int time_in_ms);
+void setvolume(const int volume);
+void setpan(const int pan);
 void GetFileExtensions(void);
+
+const wchar_t wacup_plugin_id[] = { L'w', L'a', L'c', L'u', L'p', L'(', L'i', L'n', L'_',
+									L't', L't', L'a', L'.', L'd', L'l', L'l', L')', 0 };
 
 #define OUR_INPUT_PLUG_IN_FEATURES INPUT_HAS_READ_META | INPUT_HAS_WRITE_META | INPUT_USES_UNIFIED_ALT3 | \
 								   INPUT_HAS_FORMAT_CONVERSION_UNICODE | INPUT_HAS_FORMAT_CONVERSION_SET_TIME_MODE
@@ -105,8 +113,12 @@ In_Module plugin = {
 	0/*infodlg*/,
 	0/*isourfile*/,
 	play,
+#ifndef _WIN64
 	pause,
 	unpause,
+#else
+	setpause,
+#endif
 	ispaused,
 	stop,
 	getlength,
@@ -248,8 +260,11 @@ int isourfile(const wchar_t *filename)
 {
 	return 0;
 }*/
-
+#ifndef _WIN64
 int play(const wchar_t *filename)
+#else
+int play(const wchar_t *filename, const int seek_offset)
+#endif
 {
 	if (playing_ttafile && !playing_ttafile->isValid())
 	{
@@ -306,6 +321,13 @@ int play(const wchar_t *filename)
 
 	killDecoderThread = 0;
 
+#ifdef _WIN64
+	if (seek_offset != -1)
+	{
+		setoutputtime(seek_offset);
+	}
+#endif
+
 	decoder_handle = StartPlaybackThread(DecoderThread, 0, 0, NULL);
 
 	if (!decoder_handle)
@@ -317,6 +339,7 @@ int play(const wchar_t *filename)
 	return 0;
 }
 
+#ifndef _WIN64
 void pause(void)
 {
 	if (playing_ttafile && playing_ttafile->isValid() && playing_ttafile->isDecodable())
@@ -342,6 +365,20 @@ void unpause(void)
 		plugin.outMod->Pause(0);
 	}
 }
+#else
+void setpause(const int paused)
+{
+	if (playing_ttafile && playing_ttafile->isValid() && playing_ttafile->isDecodable())
+	{
+		playing_ttafile->SetPaused(paused);
+	}
+
+	if (plugin.outMod)
+	{
+		plugin.outMod->Pause(paused);
+	}
+}
+#endif
 
 int ispaused(void)
 {
@@ -396,7 +433,7 @@ int getoutputtime(void)
 	return 0;
 }
 
-void setoutputtime(int time_in_ms)
+void setoutputtime(const int time_in_ms)
 {
 	if (playing_ttafile && playing_ttafile->isValid() && playing_ttafile->isDecodable())
 	{
@@ -404,7 +441,7 @@ void setoutputtime(int time_in_ms)
 	}
 }
 
-void setvolume(int volume)
+void setvolume(const int volume)
 {
 	if (plugin.outMod && plugin.outMod->SetVolume)
 	{
@@ -412,7 +449,7 @@ void setvolume(int volume)
 	}
 }
 
-void setpan(int pan)
+void setpan(const int pan)
 {
 	if (plugin.outMod && plugin.outMod->SetPan)
 	{
@@ -599,7 +636,7 @@ extern "C"
 	}
 
 	__declspec(dllexport) intptr_t __cdecl
-		winampGetExtendedRead_openW(const wchar_t *filename, int *size, int *bps, int *nch, int *srate)
+		winampGetExtendedRead_openW(const wchar_t *filename, size_t *size, int *bps, int *nch, int *srate)
 	{
 		CDecodeFile *dec = new CDecodeFile();
 		if (!dec->isValid())
@@ -632,7 +669,7 @@ extern "C"
 		}
 		if (size && bps && nch)
 		{
-			*size = dec->GetDataLength() * (*bps / 8) * (*nch);
+			*size = (size_t)(dec->GetDataLength() * (*bps / 8) * (*nch));
 		}
 
 		return reinterpret_cast<intptr_t>(dec);
