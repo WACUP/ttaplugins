@@ -533,7 +533,6 @@ DWORD WINAPI __stdcall DecoderThread(void *p)
 				if (playing_ttafile->isValid() && playing_ttafile->isDecodable())
 				{
 					plugin.SAAddPCMData(pcm_buffer, channels, bps, (int)playing_ttafile->GetDecodePosMs());
-					/*plugin.VSAAddPCMData(pcm_buffer, channels, bps, (int)playing_ttafile->GetDecodePosMs());*/
 				}
 
 				if (plugin.dsp_isactive())
