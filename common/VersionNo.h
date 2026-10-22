@@ -29,7 +29,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */MINOR_VERSION 02
 #define /*
 !define /**/ /*\
-*/EXTENDED_VERSION 29
+*/EXTENDED_VERSION 30
 
 
 #ifndef MAKESTR

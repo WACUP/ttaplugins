@@ -296,9 +296,8 @@ int play(const wchar_t *filename, const int seek_offset)
 
 	const int samplerate = playing_ttafile->GetSampleRate(),
 			  channels = playing_ttafile->GetNumberofChannel(),
-			  maxlatency = (plugin.outMod && plugin.outMod->Open && samplerate &&
-							channels ? plugin.outMod->Open(samplerate, channels,
-							playing_ttafile->GetOutputBPS(), -1, -1) : -1);
+			  maxlatency = OpenOutputPlugin(&plugin, samplerate, channels,
+										 playing_ttafile->GetOutputBPS());
 	if (maxlatency < 0)
 	{
 		stop();
@@ -625,13 +624,13 @@ extern "C"
 		return ((m_WriteTag != NULL) ? m_WriteTag->SetExtendedFileInfo(fn, data, val) : 0);
 	}
 
-	__declspec(dllexport) int __cdecl winampWriteExtendedFileInfo()
+	__declspec(dllexport) int __cdecl winampWriteExtendedFileInfo(WEFIPARAM)
 	{
 		if (m_ReadTag != NULL)
 		{
 			m_ReadTag->FlushCache();
 		}
-		return ((m_WriteTag != NULL) ? m_WriteTag->WriteExtendedFileInfo() : 0);
+		return ((m_WriteTag != NULL) ? m_WriteTag->WriteExtendedFileInfo(error_code) : 0);
 	}
 
 	__declspec(dllexport) intptr_t __cdecl

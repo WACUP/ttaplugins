@@ -59,7 +59,7 @@ public:
 	virtual ~CMediaLibrary();
 	__int32  GetExtendedFileInfo(const wchar_t *fn, const char *Metadata, wchar_t *dest, const size_t destlen);
 	__int32  SetExtendedFileInfo(const wchar_t *fn, const char *Metadata, const wchar_t *val);
-	__int32  WriteExtendedFileInfo();
+	__int32  WriteExtendedFileInfo(int* error_code);
 	void FlushCache(const bool skipLock = false);
 	std::wstring GetCurrentFileName() { return FileName; };
 	bool	isValid() { return isValidFile; };

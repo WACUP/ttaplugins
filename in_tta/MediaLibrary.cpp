@@ -456,7 +456,7 @@ int CMediaLibrary::SetExtendedFileInfo(const wchar_t *fn, const char *Metadata, 
 	return RetCode;
 }
 
-int CMediaLibrary::WriteExtendedFileInfo()
+int CMediaLibrary::WriteExtendedFileInfo(int* error_code)
 {
 	const LockGuard lock(CriticalSection);
 
