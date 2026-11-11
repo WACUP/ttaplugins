@@ -260,6 +260,17 @@ int isourfile(const wchar_t *filename)
 {
 	return 0;
 }*/
+
+static int StorePlaybackThread(HANDLE thread, LPVOID parameter)
+{
+	if (parameter != nullptr)
+	{
+		decoder_handle = thread;
+		return 1;
+	}
+	return 0;
+}
+
 #ifndef _WIN64
 int play(const wchar_t *filename)
 #else
@@ -327,9 +338,7 @@ int play(const wchar_t *filename, const int seek_offset)
 	}
 #endif
 
-	decoder_handle = StartPlaybackThread(DecoderThread, 0, 0, NULL);
-
-	if (!decoder_handle)
+	if (!StartPlaybackThread(DecoderThread, 0, 0, StorePlaybackThread))
 	{
 		stop();
 		return 1;
